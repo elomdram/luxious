@@ -17,7 +17,7 @@ SECRET_KEY = "jodUfHxtn-xiTr2c7_2D6hjaqhQ3o1voYE9ioVvKycNnWKALFzcs_EBIVex04I71G2
 # SECURITY WARNING: don't run with debug turned on in Production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['luxiousbeauty-land.com', 'www.luxiousbeauty-land.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['luxiousbeauty-land.com', 'www.luxiousbeauty-land.com', '127.0.0.1', 'localhost', 'luxious-production.up.railway.app']
 
 
 # Application definition
