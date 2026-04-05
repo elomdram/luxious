@@ -1,0 +1,83 @@
+{% for item in cart.items.all %}
+    <div class="py-4 cart-item">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Product Image -->
+            <div class="flex-shrink-0">
+                {% if item.product %}
+                    {% if item.product.images.all %}
+                        {% with item.product.images.all|first as image %}
+                            <img src="{{ image.image.url }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover rounded">
+                        {% endwith %}
+                    {% else %}
+                        <img src="https://picsum.photos/seed/{{ item.product.id }}/100/100.jpg" alt="{{ item.product.name }}" class="w-24 h-24 object-cover rounded">
+                    {% endif %}
+                {% elif item.service %}
+                    {% if item.service.image %}
+                        <img src="{{ item.service.image.url }}" alt="{{ item.service.name }}" class="w-24 h-24 object-cover rounded">
+                    {% else %}
+                        <img src="https://picsum.photos/seed/{{ item.service.id }}/100/100.jpg" alt="{{ item.service.name }}" class="w-24 h-24 object-cover rounded">
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <!-- Product Details -->
+            <div class="flex-grow">
+                <h3 class="font-semibold text-lg mb-1">
+                    {% if item.product %}
+                        <a href="{% url 'product_detail' item.product.slug %}" class="text-gray-800 hover:text-primary">
+                            {{ item.product.name }}
+                        </a>
+                    {% elif item.service %}
+                        <a href="{% url 'service_detail' item.service.slug %}" class="text-gray-800 hover:text-primary">
+                            {{ item.service.name }}
+                        </a>
+                    {% endif %}
+                </h3>
+                
+                {% if item.variant %}
+                    <div class="text-sm text-gray-600 mb-2">
+                        {% for option in item.variant.options.all %}
+                            {{ option.name }}: {{ option.value }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <label for="quantity-{{ item.id }}" class="mr-2">Quantité:</label>
+                        <div class="flex items-center">
+                            <button class="quantity-minus bg-gray-200 text-gray-700 px-2 py-1 rounded-l hover:bg-gray-300 transition-colors"
+                                    data-item-id="{{ item.id }}">
+                                <i class="fas fa-minus text-xs"></i>
+                            </button>
+                            <input type="number" id="quantity-{{ item.id }}" value="{{ item.quantity }}" min="1" 
+                                   class="w-12 text-center border-t border-b border-gray-200 py-1"
+                                   data-item-id="{{ item.id }}">
+                            <button class="quantity-plus bg-gray-200 text-gray-700 px-2 py-1 rounded-r hover:bg-gray-300 transition-colors"
+                                    data-item-id="{{ item.id }}">
+                                <i class="fas fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <div class="font-semibold text-primary">{{ item.price }} FCFA</div>
+                        <div class="text-sm text-gray-600">Total: <span class="item-total">{{ item.total }} FCFA</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Remove Button -->
+            <div class="flex-shrink-0">
+                <button class="remove-item text-red-500 hover:text-red-700 transition-colors"
+                        data-item-id="{{ item.id }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <div class="text-center py-8">
+        <p class="text-gray-500">Votre panier est vide.</p>
+    </div>
+{% endfor %}

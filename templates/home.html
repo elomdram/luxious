@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+
+{% block title %}Accueil - Luxious Beautyland{% endblock %}
+{% block meta_description %}Découvrez les meilleurs produits et services de beauté chez Luxious Beautyland. Votre destination de confiance pour tous vos besoins en matière de beauté.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-r from-primary to-secondary text-white">
+    <div class="container mx-auto px-4 py-20 md:py-32">
+        <div class="max-w-3xl">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6 fade-in">Révélez votre beauté naturelle avec Luxious Beautyland</h1>
+            <p class="text-xl mb-8 fade-in">Découvrez notre sélection exclusive de produits et services de beauté conçus pour sublimer votre apparence et booster votre confiance.</p>
+            <div class="flex flex-col sm:flex-row gap-4 fade-in">
+                <a href="{% url 'product_list' %}" class="bg-white text-primary px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors">
+                    Découvrir nos produits
+                </a>
+                <a href="{% url 'service_list' %}" class="border border-white text-white px-8 py-3 rounded-md font-semibold hover:bg-white hover:text-primary transition-colors">
+                    Réserver un service
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-light">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shipping-fast text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Livraison rapide</h3>
+                <p class="text-gray-600">Recevez vos commandes en 24-48h partout au Togo</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-certificate text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Produits certifiés</h3>
+                <p class="text-gray-600">Tous nos produits sont authentiques et de haute qualité</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-headset text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Support client</h3>
+                <p class="text-gray-600">Notre équipe est à votre disposition 7j/7</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Produits en vedette</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Découvrez notre sélection de produits tendance pour sublimer votre beauté</p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for product in featured_products %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="relative">
+                        {% if product.images.all %}
+                            {% with product.images.all|first as image %}
+                                <img src="{{ image.image.url }}" alt="{{ product.name }}" class="w-full h-64 object-cover">
+                            {% endwith %}
+                        {% else %}
+                            <img src="https://picsum.photos/seed/{{ product.id }}/400/300.jpg" alt="{{ product.name }}" class="w-full h-64 object-cover">
+                        {% endif %}
+                        
+                        {% if product.is_new %}
+                            <span class="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 text-xs rounded">Nouveau</span>
+                        {% endif %}
+                        
+                        {% if product.get_discount_percentage > 0 %}
+                            <span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded">-{{ product.get_discount_percentage }}%</span>
+                        {% endif %}
+                        
+                        <button class="absolute bottom-2 right-2 bg-white text-primary p-2 rounded-full shadow-md hover:bg-primary hover:text-white transition-colors"
+                                onclick="toggleWishlist({{ product.id }}, 'product')">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-2">{{ product.name }}</h3>
+                        <p class="text-gray-600 text-sm mb-3">{{ product.short_description|truncatechars:80 }}</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                {% if product.compare_price %}
+                                    <span class="text-gray-500 line-through text-sm">{{ product.compare_price }} FCFA</span>
+                                    <span class="text-primary font-bold ml-2">{{ product.price }} FCFA</span>
+                                {% else %}
+                                    <span class="text-primary font-bold">{{ product.price }} FCFA</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex text-yellow-400">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star text-xs"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <a href="{% url 'product_detail' product.slug %}" class="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded text-center hover:bg-gray-200 transition-colors">
+                                Voir
+                            </a>
+                            <button class="flex-1 bg-primary text-white py-2 px-4 rounded hover:bg-secondary transition-colors"
+                                    onclick="addToCart({{ product.id }}, 'product')">
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="col-span-full text-center text-gray-500">Aucun produit en vedette pour le moment.</p>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="{% url 'product_list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                Voir tous les produits
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="py-16 bg-light">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Nos services de beauté</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Offrez-vous une expérience de beauté inoubliable avec nos services professionnels</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for service in services %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service.name }}" class="w-full h-48 object-cover">
+                    {% else %}
+                        <img src="https://picsum.photos/seed/{{ service.id }}/400/300.jpg" alt="{{ service.name }}" class="w-full h-48 object-cover">
+                    {% endif %}
+                    
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-2">{{ service.name }}</h3>
+                        <p class="text-gray-600 text-sm mb-3">{{ service.short_description|truncatechars:80 }}</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-primary font-bold">{{ service.price }} FCFA</span>
+                            <span class="text-gray-500 text-sm">{{ service.duration }} min</span>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <a href="{% url 'service_detail' service.slug %}" class="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded text-center hover:bg-gray-200 transition-colors">
+                                Détails
+                            </a>
+                            <a href="{% url 'booking_create' service.id %}" class="flex-1 bg-primary text-white py-2 px-4 rounded text-center hover:bg-secondary transition-colors">
+                                Réserver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="col-span-full text-center text-gray-500">Aucun service disponible pour le moment.</p>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="{% url 'service_list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                Voir tous les services
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Ce que nos clients disent</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Découvrez les témoignages de nos clients satisfaits</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex mb-4">
+                    {% for i in "12345" %}
+                        <i class="fas fa-star text-yellow-400"></i>
+                    {% endfor %}
+                </div>
+                <p class="text-gray-600 mb-4">"J'ai essayé plusieurs produits de beauté, mais ceux de Luxious Beautyland sont de loin les meilleurs. Ma peau n'a jamais été aussi éclatante!"</p>
+                <div class="flex items-center">
+                    <img src="https://picsum.photos/seed/user1/50/50.jpg" alt="Client" class="w-12 h-12 rounded-full mr-3">
+                    <div>
+                        <h4 class="font-semibold">Aminata K.</h4>
+                        <p class="text-gray-500 text-sm">Cliente fidèle</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex mb-4">
+                    {% for i in "12345" %}
+                        <i class="fas fa-star text-yellow-400"></i>
+                    {% endfor %}
+                </div>
+                <p class="text-gray-600 mb-4">"Le service de manucure est exceptionnel! Le personnel est professionnel et l'ambiance est très relaxante. Je recommande vivement!"</p>
+                <div class="flex items-center">
+                    <img src="https://picsum.photos/seed/user2/50/50.jpg" alt="Client" class="w-12 h-12 rounded-full mr-3">
+                    <div>
+                        <h4 class="font-semibold">Mawuli T.</h4>
+                        <p class="text-gray-500 text-sm">Client régulier</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex mb-4">
+                    {% for i in "12345" %}
+                        <i class="fas fa-star text-yellow-400"></i>
+                    {% endfor %}
+                </div>
+                <p class="text-gray-600 mb-4">"La livraison est toujours rapide et les produits sont emballés avec soin. C'est ma boutique de beauté préférée depuis plus d'un an!"</p>
+                <div class="flex items-center">
+                    <img src="https://picsum.photos/seed/user3/50/50.jpg" alt="Client" class="w-12 h-12 rounded-full mr-3">
+                    <div>
+                        <h4 class="font-semibold">Seydou B.</h4>
+                        <p class="text-gray-500 text-sm">Nouveau client</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section class="py-16 bg-light">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Derniers articles de blog</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Conseils d'experts, tendances beauté et bien plus encore</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for post in blog_posts %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                    {% else %}
+                        <img src="https://picsum.photos/seed/{{ post.id }}/400/300.jpg" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                    {% endif %}
+                    
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <span>{{ post.published_at|date:"d F Y" }}</span>
+                            <span class="mx-2">•</span>
+                            <span>{{ post.author.get_full_name|default:post.author.username }}</span>
+                        </div>
+                        
+                        <h3 class="font-semibold text-xl mb-3">{{ post.title }}</h3>
+                        <p class="text-gray-600 mb-4">{{ post.excerpt|truncatechars:120 }}</p>
+                        
+                        <a href="{% url 'blog_detail' post.slug %}" class="text-primary font-semibold hover:text-secondary transition-colors">
+                            Lire la suite <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="col-span-full text-center text-gray-500">Aucun article de blog disponible pour le moment.</p>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="{% url 'blog_list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                Voir tous les articles
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 bg-gradient-to-r from-primary to-secondary text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Prête à révéler votre beauté naturelle?</h2>
+        <p class="text-xl mb-8 max-w-2xl mx-auto">Rejoignez des milliers de clientes satisfaites et découvrez notre sélection exclusive de produits et services de beauté.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'product_list' %}" class="bg-white text-primary px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors">
+                Découvrir nos produits
+            </a>
+            <a href="{% url 'service_list' %}" class="border border-white text-white px-8 py-3 rounded-md font-semibold hover:bg-white hover:text-primary transition-colors">
+                Réserver un service
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add to Cart Function
+    function addToCart(id, type) {
+        fetch('{% url "add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'product_id': type === 'product' ? id : null,
+                'service_id': type === 'service' ? id : null,
+                'quantity': 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count
+                const cartCountElements = document.querySelectorAll('.fa-shopping-cart').forEach(el => {
+                    const badge = el.nextElementSibling;
+                    if (badge) {
+                        badge.textContent = data.cart_items_count;
+                    }
+                });
+                
+                // Show success message
+                alert(data.message);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+    }
+    
+    // Toggle Wishlist Function
+    function toggleWishlist(id, type) {
+        fetch('{% url "toggle_wishlist" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'product_id': type === 'product' ? id : null,
+                'service_id': type === 'service' ? id : null
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update wishlist count
+                const wishlistCountElements = document.querySelectorAll('.fa-heart').forEach(el => {
+                    const badge = el.nextElementSibling;
+                    if (badge) {
+                        const currentCount = parseInt(badge.textContent);
+                        badge.textContent = data.added ? currentCount + 1 : currentCount - 1;
+                    }
+                    
+                    // Toggle heart color
+                    el.classList.toggle('text-red-500');
+                    el.classList.toggle('text-primary');
+                });
+                
+                // Show success message
+                alert(data.message);
+            } else {
+                if (data.login_required) {
+                    window.location.href = '{% url "login" %}';
+                } else {
+                    alert(data.message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+    }
+</script>
+{% endblock %}

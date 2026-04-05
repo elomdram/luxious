@@ -1,0 +1,1071 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes réservations - Luxious Beautyland{% endblock %}
+
+{% block meta_description %}Gérez toutes vos réservations de services chez Luxious Beautyland - Suivez le statut, modifiez ou annulez vos rendez-vous{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #EC4899;
+        --primary-light: #F472B6;
+        --primary-dark: #DB2777;
+        --secondary: #F472B6;
+        --secondary-light: #F9A8D4;
+        --accent: #F9A8D4;
+        --success: #10B981;
+        --warning: #F59E0B;
+        --error: #EF4444;
+        --info: #3B82F6;
+        --gray-50: #F9FAFB;
+        --gray-100: #F3F4F6;
+        --gray-200: #E5E7EB;
+        --gray-300: #D1D5DB;
+        --gray-400: #9CA3AF;
+        --gray-500: #6B7280;
+        --gray-600: #4B5563;
+        --gray-700: #374151;
+        --gray-800: #1F2937;
+        --gray-900: #111827;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .animate-slide-in {
+        animation: slideIn 0.5s ease-out forwards;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.4s ease-out forwards;
+    }
+
+    /* Cards modernes */
+    .booking-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .booking-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(236, 72, 153, 0.1), 0 10px 10px -5px rgba(236, 72, 153, 0.04);
+    }
+
+    .booking-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .booking-card:hover::before {
+        opacity: 1;
+    }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .status-badge i {
+        margin-right: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .status-badge.confirmed {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
+        color: var(--success);
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge.pending {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.2));
+        color: var(--warning);
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .status-badge.cancelled {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
+        color: var(--error);
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .status-badge.completed {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.2));
+        color: var(--info);
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    /* Filtres */
+    .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1.25rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid var(--gray-200);
+        background: white;
+        color: var(--gray-700);
+    }
+
+    .filter-chip:hover {
+        border-color: var(--primary);
+        background: rgba(236, 72, 153, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .filter-chip.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .filter-chip i {
+        margin-right: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    /* Timeline pour l'historique */
+    .timeline-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .timeline-dot::before {
+        content: '';
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(236, 72, 153, 0.2);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.3s ease;
+    }
+
+    .timeline-item:hover .timeline-dot::before {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Skeleton loading */
+    .skeleton {
+        background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+
+    /* Glassmorphism pour les modals */
+    .glass-modal {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Boutons modernes */
+    .btn-modern {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border-radius: 16px;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        padding: 0.75rem 1.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-modern:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-modern:active {
+        transform: scale(0.98);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.2);
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.3);
+    }
+
+    .btn-outline {
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+    }
+
+    .btn-outline:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, var(--gray-50), white);
+        border-radius: 32px;
+        border: 2px dashed var(--gray-300);
+    }
+
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--gray-500);
+    }
+
+    /* Pagination */
+    .pagination-item {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .pagination-item.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .pagination-item:not(.active):hover {
+        background: var(--gray-100);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive grid */
+    .bookings-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+
+    @media (max-width: 640px) {
+        .bookings-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 md:py-12">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        
+        <!-- Header avec statistiques -->
+        <div class="mb-8 md:mb-12 animate-fade-in">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-2xl bg-primary bg-opacity-10 flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-2xl text-primary"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                Mes réservations
+                            </h1>
+                            <p class="text-gray-600 mt-1">Gérez tous vos rendez-vous en un clin d'œil</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions rapides -->
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'service_list' %}" 
+                       class="btn-modern btn-primary">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nouvelle réservation
+                    </a>
+                    <button onclick="exportBookings()" 
+                            class="btn-modern btn-outline">
+                        <i class="fas fa-download mr-2"></i>
+                        Exporter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cartes de statistiques -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Total</p>
+                            <p class="text-2xl font-bold text-gray-800 stats-total">{{ page_obj.paginator.count }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-primary bg-opacity-10 flex items-center justify-center">
+                            <i class="fas fa-calendar text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Confirmées</p>
+                            <p class="text-2xl font-bold text-green-600 stats-confirmed">{{ confirmed_count|default:'0' }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">En attente</p>
+                            <p class="text-2xl font-bold text-yellow-600 stats-pending">{{ pending_count|default:'0' }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                            <i class="fas fa-clock text-yellow-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">À venir</p>
+                            <p class="text-2xl font-bold text-blue-600 stats-upcoming">{{ upcoming_count|default:'0' }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres et recherche -->
+        <div class="mb-8 animate-slide-in">
+            <div class="bg-white rounded-2xl shadow-sm p-4 md:p-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- Barre de recherche -->
+                    <div class="flex-1 relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" 
+                               id="search-input"
+                               placeholder="Rechercher par service, date..."
+                               class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-20 transition-all"
+                               value="{{ request.GET.q|default:'' }}">
+                    </div>
+                    
+                    <!-- Filtres par statut -->
+                    <div class="flex flex-wrap gap-2">
+                        <button class="filter-chip {% if not request.GET.status %}active{% endif %}" 
+                                onclick="filterByStatus('')">
+                            <i class="fas fa-list-ul"></i>
+                            Tous
+                        </button>
+                        <button class="filter-chip {% if request.GET.status == 'confirmed' %}active{% endif %}" 
+                                onclick="filterByStatus('confirmed')">
+                            <i class="fas fa-check-circle"></i>
+                            Confirmées
+                        </button>
+                        <button class="filter-chip {% if request.GET.status == 'pending' %}active{% endif %}" 
+                                onclick="filterByStatus('pending')">
+                            <i class="fas fa-clock"></i>
+                            En attente
+                        </button>
+                        <button class="filter-chip {% if request.GET.status == 'completed' %}active{% endif %}" 
+                                onclick="filterByStatus('completed')">
+                            <i class="fas fa-check-double"></i>
+                            Terminées
+                        </button>
+                        <button class="filter-chip {% if request.GET.status == 'cancelled' %}active{% endif %}" 
+                                onclick="filterByStatus('cancelled')">
+                            <i class="fas fa-times-circle"></i>
+                            Annulées
+                        </button>
+                    </div>
+                    
+                    <!-- Tri -->
+                    <select id="sort-select" 
+                            class="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary bg-white"
+                            onchange="changeSort(this.value)">
+                        <option value="-date" {% if request.GET.sort == '-date' %}selected{% endif %}>Plus récentes</option>
+                        <option value="date" {% if request.GET.sort == 'date' %}selected{% endif %}>Plus anciennes</option>
+                        <option value="-total" {% if request.GET.sort == '-total' %}selected{% endif %}>Montant + élevé</option>
+                        <option value="total" {% if request.GET.sort == 'total' %}selected{% endif %}>Montant - élevé</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des réservations -->
+        <div class="bookings-grid" id="bookings-container">
+            {% for booking in bookings %}
+            <div class="booking-card animate-scale-in" 
+                 style="animation-delay: {{ forloop.counter0 }}00ms"
+                 data-booking-id="{{ booking.id }}"
+                 data-service-name="{{ booking.service.name }}"
+                 data-service-id="{{ booking.service.id }}">
+                
+                <!-- En-tête avec statut -->
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <span class="text-xs text-gray-500">Réservation #{{ booking.id }}</span>
+                            <h3 class="font-bold text-lg mt-1">{{ booking.service.name }}</h3>
+                        </div>
+                        <span class="status-badge {{ booking.status }}">
+                            <i class="fas 
+                                {% if booking.status == 'confirmed' %}fa-check-circle
+                                {% elif booking.status == 'pending' %}fa-clock
+                                {% elif booking.status == 'completed' %}fa-check-double
+                                {% elif booking.status == 'cancelled' %}fa-times-circle
+                                {% else %}fa-question-circle{% endif %}">
+                            </i>
+                            {% if booking.status == 'confirmed' %}Confirmée
+                            {% elif booking.status == 'pending' %}En attente
+                            {% elif booking.status == 'completed' %}Terminée
+                            {% elif booking.status == 'cancelled' %}Annulée
+                            {% else %}No Show{% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- Image et détails -->
+                    <div class="flex gap-4 mb-4">
+                        {% if booking.service.image %}
+                            <img src="{{ booking.service.image.url }}" 
+                                 alt="{{ booking.service.name }}" 
+                                 class="w-20 h-20 object-cover rounded-xl">
+                        {% else %}
+                            <div class="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+                                <i class="fas fa-cut text-white text-2xl"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="flex-1 space-y-2">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-calendar w-5 text-primary"></i>
+                                <span>{{ booking.date|date:"l d F Y"|capfirst }}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-clock w-5 text-primary"></i>
+                                <span>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-users w-5 text-primary"></i>
+                                <span>{{ booking.participants }} participant{{ booking.participants|pluralize }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Prix et actions -->
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-sm text-gray-500">Total</span>
+                                <div class="text-xl font-bold text-primary">{{ booking.total }} FCFA</div>
+                            </div>
+                            
+                            <!-- Statut de paiement -->
+                            {% if booking.payment_status %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                                {% if booking.payment_status == 'paid' %}bg-green-100 text-green-700
+                                {% elif booking.payment_status == 'pending' %}bg-yellow-100 text-yellow-700
+                                {% else %}bg-red-100 text-red-700{% endif %}">
+                                <i class="fas 
+                                    {% if booking.payment_status == 'paid' %}fa-check-circle
+                                    {% elif booking.payment_status == 'pending' %}fa-clock
+                                    {% else %}fa-exclamation-circle{% endif %} mr-1">
+                                </i>
+                                {% if booking.payment_status == 'paid' %}Payé
+                                {% elif booking.payment_status == 'pending' %}En attente
+                                {% else %}Échoué{% endif %}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex gap-2">
+                            <a href="{% url 'booking_detail' booking.id %}" 
+                               class="flex-1 btn-modern btn-outline">
+                                <i class="fas fa-eye mr-2"></i>
+                                Détails
+                            </a>
+                            
+                            {% if booking.status == 'pending' %}
+                                <button onclick="processPayment('{{ booking.id }}')" 
+                                        class="flex-1 btn-modern btn-primary">
+                                    <i class="fas fa-credit-card mr-2"></i>
+                                    Payer
+                                </button>
+                            {% elif booking.status == 'confirmed' %}
+                                <button onclick="rescheduleBooking('{{ booking.id }}')" 
+                                        class="flex-1 btn-modern btn-outline">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Reporter
+                                </button>
+                            {% elif booking.status == 'completed' %}
+                                <button onclick="reviewService('{{ booking.service.id }}')" 
+                                        class="flex-1 btn-modern btn-outline">
+                                    <i class="fas fa-star mr-2"></i>
+                                    Évaluer
+                                </button>
+                            {% endif %}
+                            
+                            {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                                <button onclick="cancelBooking('{{ booking.id }}', '{{ booking.service.name|escapejs }}')" 
+                                        class="w-10 h-10 rounded-xl border border-red-200 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline compacte -->
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+                                <span>Créée {{ booking.created_at|timesince }}</span>
+                            </div>
+                            {% if booking.payment_confirmed_at %}
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+                                <span>Payée {{ booking.payment_confirmed_at|timesince }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- État vide -->
+            <div class="col-span-full empty-state animate-fade-in">
+                <div class="empty-state-icon">
+                    <i class="fas fa-calendar-times"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Aucune réservation</h3>
+                <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                    Vous n'avez pas encore de réservation. Découvrez nos services et réservez votre premier rendez-vous !
+                </p>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <a href="{% url 'service_list' %}" 
+                       class="btn-modern btn-primary">
+                        <i class="fas fa-search mr-2"></i>
+                        Explorer les services
+                    </a>
+                    <a href="{% url 'home' %}" 
+                       class="btn-modern btn-outline">
+                        <i class="fas fa-home mr-2"></i>
+                        Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="mt-12 flex justify-center">
+            <nav class="flex items-center gap-2" aria-label="Pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                   class="pagination-item">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num == page_obj.number %}
+                        <span class="pagination-item active">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                           class="pagination-item">
+                            {{ num }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                   class="pagination-item">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal d'annulation -->
+<div id="cancel-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden backdrop-blur-sm">
+    <div class="glass-modal rounded-3xl p-8 max-w-md w-full mx-4 animate-scale-in">
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Annuler la réservation</h3>
+            <p class="text-gray-600" id="cancel-service-name"></p>
+        </div>
+        
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-yellow-600 mt-0.5 mr-3"></i>
+                <div>
+                    <p class="text-sm text-yellow-800 font-medium">Politique d'annulation</p>
+                    <p class="text-xs text-yellow-700 mt-1">
+                        Les annulations doivent être effectuées au moins 24 heures avant le rendez-vous. 
+                        Passé ce délai, des frais peuvent s'appliquer.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-3">
+            <button onclick="hideCancelModal()" 
+                    class="flex-1 py-3 px-4 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all font-medium">
+                Non, garder
+            </button>
+            <button onclick="confirmCancel()" 
+                    class="flex-1 py-3 px-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all font-medium">
+                Oui, annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de report -->
+<div id="reschedule-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden backdrop-blur-sm">
+    <div class="glass-modal rounded-3xl p-8 max-w-md w-full mx-4 animate-scale-in">
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-alt text-primary text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Reporter le rendez-vous</h3>
+            <p class="text-gray-600">Choisissez une nouvelle date pour votre réservation</p>
+        </div>
+        
+        <form id="reschedule-form" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" id="reschedule-booking-id">
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nouvelle date</label>
+                <input type="date" 
+                       id="new-date"
+                       min="{{ today|date:'Y-m-d' }}"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nouvelle heure</label>
+                <div id="time-slots" class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2">
+                    <!-- Les créneaux seront chargés ici -->
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="hideRescheduleModal()" 
+                        class="flex-1 py-3 px-4 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all">
+                    Annuler
+                </button>
+                <button type="submit" 
+                        class="flex-1 py-3 px-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:from-primary-dark hover:to-secondary transition-all">
+                    Confirmer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast de notification -->
+<div id="toast" class="fixed bottom-4 right-4 z-50 transform transition-all duration-500 translate-y-full opacity-0">
+    <div class="bg-white rounded-xl shadow-2xl border-l-4 overflow-hidden" id="toast-content">
+        <!-- Le contenu sera injecté par JS -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configuration
+    const CSRF_TOKEN = '{{ csrf_token }}';
+    let currentBookingId = null;
+    let currentServiceName = '';
+    let searchTimeout = null;
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Recherche en temps réel
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    performSearch(e.target.value);
+                }, 500);
+            });
+        }
+
+        // Gestionnaire de touches pour fermer les modals
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideCancelModal();
+                hideRescheduleModal();
+            }
+        });
+
+        // Initialisation des statistiques si non fournies par le backend
+        initializeStats();
+    });
+
+    // Initialisation des statistiques
+    function initializeStats() {
+        const statsTotal = document.querySelector('.stats-total');
+        const statsConfirmed = document.querySelector('.stats-confirmed');
+        const statsPending = document.querySelector('.stats-pending');
+        const statsUpcoming = document.querySelector('.stats-upcoming');
+
+        // Si les statistiques ne sont pas fournies, les calculer
+        if (statsConfirmed && statsConfirmed.textContent === '0') {
+            const confirmedCount = document.querySelectorAll('.status-badge.confirmed').length;
+            const pendingCount = document.querySelectorAll('.status-badge.pending').length;
+            
+            // Calculer les réservations à venir (date >= aujourd'hui)
+            const today = new Date().toISOString().split('T')[0];
+            let upcomingCount = 0;
+            
+            document.querySelectorAll('.booking-card').forEach(card => {
+                const dateElement = card.querySelector('.fa-calendar + span');
+                if (dateElement) {
+                    // Logique simplifiée - à améliorer selon votre format de date
+                    upcomingCount++;
+                }
+            });
+
+            if (statsConfirmed) statsConfirmed.textContent = confirmedCount;
+            if (statsPending) statsPending.textContent = pendingCount;
+            if (statsUpcoming) statsUpcoming.textContent = upcomingCount;
+        }
+    }
+
+    // Filtres
+    function filterByStatus(status) {
+        const url = new URL(window.location.href);
+        if (status) {
+            url.searchParams.set('status', status);
+        } else {
+            url.searchParams.delete('status');
+        }
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    }
+
+    function changeSort(sort) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort', sort);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    }
+
+    // Recherche
+    function performSearch(query) {
+        const url = new URL(window.location.href);
+        if (query) {
+            url.searchParams.set('q', query);
+        } else {
+            url.searchParams.delete('q');
+        }
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    }
+
+    // Gestion des réservations
+    function processPayment(bookingId) {
+        showToast('info', 'Redirection vers la page de paiement...');
+        setTimeout(() => {
+            window.location.href = `/booking/${bookingId}/payment/`;
+        }, 1000);
+    }
+
+    // Annulation
+    function cancelBooking(bookingId, serviceName) {
+        currentBookingId = bookingId;
+        currentServiceName = serviceName;
+        document.getElementById('cancel-service-name').textContent = 
+            `Voulez-vous annuler votre réservation pour ${serviceName} ?`;
+        document.getElementById('cancel-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideCancelModal() {
+        document.getElementById('cancel-modal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        currentBookingId = null;
+        currentServiceName = '';
+    }
+
+    async function confirmCancel() {
+        if (!currentBookingId) return;
+
+        try {
+            showToast('info', 'Annulation en cours...');
+
+            const response = await fetch(`/api/bookings/${currentBookingId}/cancel/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            hideCancelModal();
+
+            if (data.success) {
+                showToast('success', 'Réservation annulée avec succès !');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast('error', data.message || 'Erreur lors de l\'annulation');
+            }
+        } catch (error) {
+            hideCancelModal();
+            showToast('error', 'Une erreur est survenue. Veuillez réessayer.');
+        }
+    }
+
+    // Report
+    function rescheduleBooking(bookingId) {
+        currentBookingId = bookingId;
+        document.getElementById('reschedule-booking-id').value = bookingId;
+        
+        // Charger les créneaux disponibles
+        loadTimeSlots(bookingId);
+        
+        document.getElementById('reschedule-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideRescheduleModal() {
+        document.getElementById('reschedule-modal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        currentBookingId = null;
+    }
+
+    async function loadTimeSlots(bookingId) {
+        const container = document.getElementById('time-slots');
+        
+        // Récupérer l'ID du service depuis l'élément
+        const bookingElement = document.querySelector(`[data-booking-id="${bookingId}"]`);
+        const serviceId = bookingElement ? bookingElement.dataset.serviceId : null;
+        
+        if (!serviceId) {
+            container.innerHTML = '<div class="col-span-3 text-center text-red-500">Service non trouvé</div>';
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="col-span-3 text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-sm text-gray-600">Chargement des créneaux...</p>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/api/services/${serviceId}/available-dates/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                container.innerHTML = '';
+                
+                // Générer les créneaux de 8h à 18h
+                for (let hour = 8; hour <= 17; hour++) {
+                    for (let minute of [0, 30]) {
+                        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                        
+                        const slotBtn = document.createElement('button');
+                        slotBtn.type = 'button';
+                        slotBtn.className = 'p-2 text-sm border border-gray-200 rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all';
+                        slotBtn.textContent = timeString;
+                        slotBtn.onclick = function() { selectTimeSlot(timeString); };
+                        
+                        container.appendChild(slotBtn);
+                    }
+                }
+            } else {
+                container.innerHTML = '<div class="col-span-3 text-center text-red-500">Erreur de chargement</div>';
+            }
+        } catch (error) {
+            container.innerHTML = '<div class="col-span-3 text-center text-red-500">Erreur de chargement</div>';
+        }
+    }
+
+    let selectedTimeSlot = null;
+
+    function selectTimeSlot(time) {
+        // Retirer la sélection précédente
+        document.querySelectorAll('#time-slots button').forEach(btn => {
+            btn.classList.remove('bg-primary', 'text-white', 'border-primary');
+        });
+        
+        // Ajouter la nouvelle sélection
+        event.target.classList.add('bg-primary', 'text-white', 'border-primary');
+        selectedTimeSlot = time;
+    }
+
+    // Gestionnaire du formulaire de report
+    const rescheduleForm = document.getElementById('reschedule-form');
+    if (rescheduleForm) {
+        rescheduleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newDate = document.getElementById('new-date').value;
+            const newTime = selectedTimeSlot;
+            
+            if (!newDate || !newTime) {
+                showToast('error', 'Veuillez sélectionner une date et une heure');
+                return;
+            }
+            
+            showToast('info', 'Fonctionnalité de report en cours de développement');
+            hideRescheduleModal();
+        });
+    }
+
+    // Avis
+    function reviewService(serviceId) {
+        window.location.href = `/services/${serviceId}/review/`;
+    }
+
+    // Export
+    function exportBookings() {
+        showToast('info', 'Préparation de l\'export...');
+        setTimeout(() => {
+            showToast('success', 'Export terminé !');
+        }, 2000);
+    }
+
+    // Toast notification
+    function showToast(type, message) {
+        const toast = document.getElementById('toast');
+        const content = document.getElementById('toast-content');
+        
+        const icons = {
+            success: 'fa-check-circle text-green-500',
+            error: 'fa-exclamation-circle text-red-500',
+            info: 'fa-info-circle text-blue-500',
+            warning: 'fa-exclamation-triangle text-yellow-500'
+        };
+        
+        const colors = {
+            success: 'border-green-500',
+            error: 'border-red-500',
+            info: 'border-blue-500',
+            warning: 'border-yellow-500'
+        };
+        
+        content.className = `bg-white rounded-xl shadow-2xl border-l-4 ${colors[type]} overflow-hidden`;
+        content.innerHTML = `
+            <div class="flex items-center p-4">
+                <i class="fas ${icons[type]} text-xl mr-3"></i>
+                <p class="text-gray-700">${message}</p>
+                <button onclick="hideToast()" class="ml-4 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        toast.classList.remove('translate-y-full', 'opacity-0');
+        
+        setTimeout(hideToast, 5000);
+    }
+
+    function hideToast() {
+        const toast = document.getElementById('toast');
+        toast.classList.add('translate-y-full', 'opacity-0');
+    }
+</script>
+{% endblock %}

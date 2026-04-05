@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Allow: /Product/
+Allow: /Product/*/
+Allow: /services/
+Allow: /services/*/
+Allow: /blog/
+Allow: /blog/*/
+Allow: /page/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /account/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /search/
+Disallow: /logout/
+Disallow: /login/
+
+# Sitemap
+Sitemap: https://luxiousbeauty-land.com/sitemap.xml

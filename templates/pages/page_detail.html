@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - Luxious Beautyland{% endblock %}
+
+{% block meta_description %}{{ page.meta_description|default:page.content|truncatewords:30 }}{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-b from-gray-50 to-white min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <!-- Breadcrumb -->
+        <nav class="flex mb-8 text-sm">
+            <ol class="flex items-center space-x-2">
+                <li>
+                    <a href="{% url 'home' %}" class="text-gray-500 hover:text-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Accueil
+                    </a>
+                </li>
+                <li class="text-gray-400">/</li>
+                <li class="text-gray-700 font-medium">{{ page.title }}</li>
+            </ol>
+        </nav>
+
+        <!-- Contenu de la page -->
+        <div class="max-w-4xl mx-auto">
+            <!-- En-tête -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-pink-100 rounded-full mb-6">
+                    {% if page.slug == 'contact' %}
+                        <i class="fas fa-envelope text-3xl text-primary"></i>
+                    {% elif page.slug == 'about' or page.slug == 'a-propos' %}
+                        <i class="fas fa-info-circle text-3xl text-primary"></i>
+                    {% elif page.slug == 'faq' %}
+                        <i class="fas fa-question-circle text-3xl text-primary"></i>
+                    {% elif page.slug == 'shipping' or page.slug == 'livraison' %}
+                        <i class="fas fa-truck text-3xl text-primary"></i>
+                    {% elif page.slug == 'returns' or page.slug == 'retours' %}
+                        <i class="fas fa-undo-alt text-3xl text-primary"></i>
+                    {% elif page.slug == 'payment' or page.slug == 'paiement' %}
+                        <i class="fas fa-credit-card text-3xl text-primary"></i>
+                    {% elif page.slug == 'terms' or page.slug == 'conditions' %}
+                        <i class="fas fa-file-contract text-3xl text-primary"></i>
+                    {% elif page.slug == 'privacy' or page.slug == 'confidentialite' %}
+                        <i class="fas fa-shield-alt text-3xl text-primary"></i>
+                    {% else %}
+                        <i class="fas fa-file-alt text-3xl text-primary"></i>
+                    {% endif %}
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{{ page.title }}</h1>
+                {% if page.meta_description %}
+                    <p class="text-gray-600 max-w-2xl mx-auto">{{ page.meta_description }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 prose prose-pink max-w-none">
+                {{ page.content|linebreaks|safe }}
+            </div>
+
+            <!-- Date de mise à jour -->
+            <div class="mt-6 text-right text-sm text-gray-500">
+                <i class="far fa-calendar-alt mr-1"></i> 
+                Dernière mise à jour : {{ page.updated_at|date:"d F Y" }}
+            </div>
+
+            <!-- Section Contact rapide pour certaines pages -->
+            {% if page.slug == 'contact' %}
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Téléphone -->
+                <div class="bg-gradient-to-br from-pink-50 to-white rounded-xl p-6 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-pink-100 rounded-full mb-4">
+                        <i class="fas fa-phone-alt text-primary"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Téléphone</h3>
+                    <p class="text-gray-600">+228 90 71 29 28</p>
+                    <p class="text-sm text-gray-500 mt-2">Lun-Ven: 9h-18h</p>
+                </div>
+
+                <!-- Email -->
+                <div class="bg-gradient-to-br from-pink-50 to-white rounded-xl p-6 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-pink-100 rounded-full mb-4">
+                        <i class="fas fa-envelope text-primary"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Email</h3>
+                    <p class="text-gray-600">contact@luxiousbeautyland.com</p>
+                    <p class="text-sm text-gray-500 mt-2">Réponse sous 24h</p>
+                </div>
+
+                <!-- Adresse -->
+                <div class="bg-gradient-to-br from-pink-50 to-white rounded-xl p-6 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-pink-100 rounded-full mb-4">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Adresse</h3>
+                    <p class="text-gray-600">Amandahomé</p>
+                    <p class="text-gray-600">Lomé, Togo</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Navigation entre pages -->
+            <div class="mt-12 flex justify-center">
+                <a href="{% url 'home' %}" class="inline-flex items-center text-primary hover:text-secondary transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour à l'accueil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Style pour le contenu riche */
+    .prose {
+        color: #374151;
+        line-height: 1.75;
+    }
+    .prose h1 {
+        font-size: 2em;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        font-weight: 700;
+        color: #1F2937;
+    }
+    .prose h2 {
+        font-size: 1.5em;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        font-weight: 600;
+        color: #374151;
+    }
+    .prose h3 {
+        font-size: 1.25em;
+        margin-top: 0.75em;
+        margin-bottom: 0.5em;
+        font-weight: 600;
+        color: #374151;
+    }
+    .prose p {
+        margin-bottom: 1em;
+    }
+    .prose ul {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        padding-left: 1.5em;
+        list-style-type: disc;
+    }
+    .prose ol {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        padding-left: 1.5em;
+        list-style-type: decimal;
+    }
+    .prose li {
+        margin-bottom: 0.25em;
+    }
+    .prose a {
+        color: #EC4899;
+        text-decoration: underline;
+    }
+    .prose a:hover {
+        color: #F472B6;
+    }
+    .prose blockquote {
+        border-left: 4px solid #EC4899;
+        padding-left: 1em;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+        color: #6B7280;
+    }
+    .prose img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1.5em 0;
+    }
+    .prose table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+    }
+    .prose th {
+        background-color: #F3F4F6;
+        font-weight: 600;
+        padding: 0.5em;
+        border: 1px solid #E5E7EB;
+    }
+    .prose td {
+        padding: 0.5em;
+        border: 1px solid #E5E7EB;
+    }
+</style>
+{% endblock %}

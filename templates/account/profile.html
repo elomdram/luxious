@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- En-tête -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Mon Profil</h1>
+            <p class="text-gray-600">Gérez vos informations personnelles et vos préférences</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Menu latéral -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                            <span class="text-white text-2xl font-bold">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">{{ user.get_full_name }}</h3>
+                            <p class="text-gray-600 text-sm">{{ user.email }}</p>
+                            <p class="text-gray-500 text-xs">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
+                        </div>
+                    </div>
+
+                    <nav class="space-y-2">
+                        <a href="{% url 'profile' %}" class="flex items-center px-4 py-3 bg-primary text-white rounded-md">
+                            <i class="fas fa-user-circle mr-3"></i>
+                            <span>Informations personnelles</span>
+                        </a>
+                        <a href="{% url 'order_list' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                            <i class="fas fa-shopping-bag mr-3"></i>
+                            <span>Mes commandes</span>
+                        </a>
+                        <a href="{% url 'address_list' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                            <i class="fas fa-map-marker-alt mr-3"></i>
+                            <span>Mes adresses</span>
+                        </a>
+                        <a href="{% url 'wishlist' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                            <i class="fas fa-heart mr-3"></i>
+                            <span>Ma wishlist</span>
+                        </a>
+                        <a href="{% url 'booking_list' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                            <i class="fas fa-calendar-alt mr-3"></i>
+                            <span>Mes réservations</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Formulaire de profil -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Informations personnelles</h2>
+
+                    <form method="post" id="profile-form">
+                        {% csrf_token %}
+                        
+                        <!-- Messages d'erreur -->
+                        {% if form.errors %}
+                        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+                            <p class="text-red-700 text-sm">Veuillez corriger les erreurs ci-dessous.</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Informations de base -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+                                <input type="text" name="first_name" id="first_name" value="{{ form.first_name.value|default:user.first_name }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                {% if form.first_name.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.first_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                                <input type="text" name="last_name" id="last_name" value="{{ form.last_name.value|default:user.last_name }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                {% if form.last_name.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.last_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Email et téléphone -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Adresse email *</label>
+                                <input type="email" name="email" id="email" value="{{ form.email.value|default:user.email }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                {% if form.email.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                                <input type="tel" name="phone" id="phone" value="{{ form.phone.value|default:user.phone }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                {% if form.phone.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.phone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Date de naissance et genre -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-2">Date de naissance</label>
+                                <input type="date" name="birth_date" id="birth_date" 
+                                       value="{{ form.birth_date.value|default:user.birth_date|date:'Y-m-d' }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                {% if form.birth_date.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.birth_date.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">Genre</label>
+                                <select name="gender" id="gender" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                    <option value="">Sélectionnez</option>
+                                    <option value="M" {% if form.gender.value == 'M' or user.gender == 'M' %}selected{% endif %}>Homme</option>
+                                    <option value="F" {% if form.gender.value == 'F' or user.gender == 'F' %}selected{% endif %}>Femme</option>
+                                    <option value="O" {% if form.gender.value == 'O' or user.gender == 'O' %}selected{% endif %}>Autre</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter -->
+                        <div class="mb-8">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="newsletter_subscribed" id="newsletter_subscribed" 
+                                       {% if form.newsletter_subscribed.value or user.newsletter_subscribed %}checked{% endif %}
+                                       class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="newsletter_subscribed" class="ml-2 text-sm text-gray-700">
+                                    Je souhaite recevoir la newsletter et les offres promotionnelles par email
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Changement de mot de passe (optionnel) -->
+                        <div class="border-t border-gray-200 pt-6 mb-8">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Changer le mot de passe</h3>
+                            <p class="text-gray-600 text-sm mb-4">Laissez vide si vous ne souhaitez pas changer votre mot de passe</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
+                                    <input type="password" name="current_password" id="current_password"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="new_password1" class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
+                                        <input type="password" name="new_password1" id="new_password1"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="new_password2" class="block text-sm font-medium text-gray-700 mb-2">Confirmation</label>
+                                        <input type="password" name="new_password2" id="new_password2"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                            <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-800 transition-colors">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour à l'accueil
+                            </a>
+                            <div class="flex space-x-4">
+                                <button type="button" onclick="window.location.reload()" 
+                                        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                                    Annuler
+                                </button>
+                                <button type="submit" 
+                                        class="px-6 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Section compte -->
+                <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Informations du compte</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-sm text-gray-600">Date d'inscription</p>
+                            <p class="font-medium">{{ user.date_joined|date:"d/m/Y" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Dernière connexion</p>
+                            <p class="font-medium">{{ user.last_login|date:"d/m/Y à H:i" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Email vérifié</p>
+                            <p class="font-medium">
+                                {% if user.email_verified %}
+                                <span class="text-green-600"><i class="fas fa-check-circle mr-1"></i> Oui</span>
+                                {% else %}
+                                <span class="text-yellow-600"><i class="fas fa-exclamation-circle mr-1"></i> Non</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Téléphone vérifié</p>
+                            <p class="font-medium">
+                                {% if user.phone_verified %}
+                                <span class="text-green-600"><i class="fas fa-check-circle mr-1"></i> Oui</span>
+                                {% else %}
+                                <span class="text-yellow-600"><i class="fas fa-exclamation-circle mr-1"></i> Non</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validation du formulaire
+document.getElementById('profile-form').addEventListener('submit', function(e) {
+    const currentPassword = document.getElementById('current_password').value;
+    const newPassword1 = document.getElementById('new_password1').value;
+    const newPassword2 = document.getElementById('new_password2').value;
+    
+    // Vérifier si l'utilisateur essaie de changer le mot de passe
+    if (newPassword1 || newPassword2 || currentPassword) {
+        if (!currentPassword) {
+            alert('Veuillez entrer votre mot de passe actuel pour changer le mot de passe.');
+            e.preventDefault();
+            return;
+        }
+        
+        if (newPassword1 !== newPassword2) {
+            alert('Les nouveaux mots de passe ne correspondent pas.');
+            e.preventDefault();
+            return;
+        }
+        
+        if (newPassword1.length < 8) {
+            alert('Le nouveau mot de passe doit contenir au moins 8 caractères.');
+            e.preventDefault();
+            return;
+        }
+    }
+});
+</script>
+{% endblock %}

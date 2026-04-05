@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon panier - Luxious Beautyland{% endblock %}
+{% block meta_description %}Consultez votre panier et finalisez votre commande sur Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Mon panier</h1>
+    
+    {% if cart.items.exists %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Cart Items -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Articles dans votre panier</h2>
+                    
+                    <div class="divide-y divide-gray-200">
+                        {% for item in cart.items.all %}
+                            <div class="py-4 cart-item" data-item-id="{{ item.id }}">
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <!-- Product Image -->
+                                    <div class="flex-shrink-0">
+                                        {% if item.product %}
+                                            {% if item.product.images.all %}
+                                                {% with item.product.images.all|first as image %}
+                                                    <img src="{{ image.image.url }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover rounded">
+                                                {% endwith %}
+                                            {% else %}
+                                                <img src="https://picsum.photos/seed/{{ item.product.id }}/100/100.jpg" alt="{{ item.product.name }}" class="w-24 h-24 object-cover rounded">
+                                            {% endif %}
+                                        {% elif item.service %}
+                                            {% if item.service.image %}
+                                                <img src="{{ item.service.image.url }}" alt="{{ item.service.name }}" class="w-24 h-24 object-cover rounded">
+                                            {% else %}
+                                                <img src="https://picsum.photos/seed/{{ item.service.id }}/100/100.jpg" alt="{{ item.service.name }}" class="w-24 h-24 object-cover rounded">
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Product Details -->
+                                    <div class="flex-grow">
+                                        <h3 class="font-semibold text-lg mb-1">
+                                            {% if item.product %}
+                                                <a href="{% url 'product_detail' item.product.slug %}" class="text-gray-800 hover:text-primary">
+                                                    {{ item.product.name }}
+                                                </a>
+                                            {% elif item.service %}
+                                                <a href="{% url 'service_detail' item.service.slug %}" class="text-gray-800 hover:text-primary">
+                                                    {{ item.service.name }}
+                                                </a>
+                                            {% endif %}
+                                        </h3>
+                                        
+                                        {% if item.variant %}
+                                            <div class="text-sm text-gray-600 mb-2">
+                                                {% for option in item.variant.options.all %}
+                                                    {{ option.name }}: {{ option.value }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div class="flex items-center">
+                                                <label for="quantity-{{ item.id }}" class="mr-2 text-sm">Quantité:</label>
+                                                <div class="flex items-center">
+                                                    <button class="quantity-minus bg-gray-200 text-gray-700 px-2 py-1 rounded-l hover:bg-gray-300 transition-colors"
+                                                            data-item-id="{{ item.id }}">
+                                                        <i class="fas fa-minus text-xs"></i>
+                                                    </button>
+                                                    <input type="number" id="quantity-{{ item.id }}" value="{{ item.quantity }}" min="1" 
+                                                           class="w-14 text-center border-t border-b border-gray-200 py-1"
+                                                           data-item-id="{{ item.id }}">
+                                                    <button class="quantity-plus bg-gray-200 text-gray-700 px-2 py-1 rounded-r hover:bg-gray-300 transition-colors"
+                                                            data-item-id="{{ item.id }}">
+                                                        <i class="fas fa-plus text-xs"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="text-right">
+                                                <div class="font-semibold text-primary text-lg">{{ item.price|floatformat:0 }} FCFA</div>
+                                                <div class="text-sm text-gray-600">Total: <span class="item-total font-medium">{{ item.total|floatformat:0 }} FCFA</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Remove Button -->
+                                    <div class="flex-shrink-0">
+                                        <button class="remove-item text-red-500 hover:text-red-700 transition-colors"
+                                                data-item-id="{{ item.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <a href="{% url 'product_list' %}" class="text-primary hover:text-secondary transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>Continuer vos achats
+                        </a>
+                        <button id="clear-cart" class="text-red-500 hover:text-red-700 transition-colors">
+                            <i class="fas fa-trash mr-2"></i>Vider le panier
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cart Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-20">
+                    <h2 class="text-xl font-semibold mb-4">Récapitulatif</h2>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span>Sous-total</span>
+                            <span id="subtotal" class="font-medium">{{ cart.total|floatformat:0 }} FCFA</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Livraison</span>
+                            <span id="shipping" class="text-gray-600">Calculé à l'étape suivante</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Réduction</span>
+                            <span id="discount" class="text-green-600">0 FCFA</span>
+                        </div>
+                        <div class="border-t pt-3">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Total</span>
+                                <span id="total" class="text-primary">{{ cart.total|floatformat:0 }} FCFA</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coupon Code -->
+                    <div class="mb-6">
+                        <h3 class="font-semibold mb-2">Code promo</h3>
+                        <div class="flex">
+                            <input type="text" id="coupon-code" placeholder="Entrez votre code promo" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-l focus:outline-none focus:border-primary">
+                            <button id="apply-coupon" class="bg-primary text-white px-4 py-2 rounded-r hover:bg-secondary transition-colors">
+                                Appliquer
+                            </button>
+                        </div>
+                        <div id="coupon-message" class="mt-2 text-sm"></div>
+                    </div>
+                    
+                    <!-- Checkout Button -->
+                    <a href="{% url 'checkout' %}" class="block w-full bg-primary text-white text-center py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                        Procéder au paiement
+                    </a>
+                    
+                    <!-- Payment Methods Icons -->
+                    <div class="mt-4 flex justify-center space-x-2">
+                        <img src="https://fedapay.com/assets/img/logo-sm.png" alt="FedaPay" class="h-6">
+                        <span class="text-gray-400">|</span>
+                        <i class="fas fa-mobile-alt text-gray-600 text-xl"></i>
+                        <i class="fas fa-credit-card text-gray-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow-md p-8 text-center">
+            <div class="mb-6">
+                <i class="fas fa-shopping-cart text-6xl text-gray-300"></i>
+            </div>
+            <h2 class="text-2xl font-semibold mb-4">Votre panier est vide</h2>
+            <p class="text-gray-600 mb-6">Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.</p>
+            <a href="{% url 'product_list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                Commencer vos achats
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format number with thousands separator
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', {
+                maximumFractionDigits: 0,
+                minimumFractionDigits: 0
+            }).format(price) + ' FCFA';
+        }
+
+        // Parse price string to number
+        function parsePrice(priceStr) {
+            return parseFloat(priceStr.replace(/[^\d]/g, '')) || 0;
+        }
+
+        // Update Cart Item Quantity
+        document.querySelectorAll('.quantity-minus, .quantity-plus').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                const input = document.querySelector(`input[data-item-id="${itemId}"]`);
+                let quantity = parseInt(input.value);
+                
+                if (this.classList.contains('quantity-minus')) {
+                    quantity = Math.max(1, quantity - 1);
+                } else {
+                    quantity += 1;
+                }
+                
+                input.value = quantity;
+                updateCartItem(itemId, quantity);
+            });
+        });
+        
+        // Update Cart Item on Input Change
+        document.querySelectorAll('input[data-item-id]').forEach(input => {
+            input.addEventListener('change', function() {
+                const itemId = this.getAttribute('data-item-id');
+                const quantity = Math.max(1, parseInt(this.value) || 1);
+                this.value = quantity;
+                updateCartItem(itemId, quantity);
+            });
+        });
+        
+        // Update Cart Item Function
+        function updateCartItem(itemId, quantity) {
+            fetch(`/api/cart/update/${itemId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the item total
+                    const cartItem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+                    if (cartItem) {
+                        const itemTotalSpan = cartItem.querySelector('.item-total');
+                        if (itemTotalSpan) {
+                            itemTotalSpan.textContent = formatPrice(data.item_total);
+                        }
+                    }
+                    
+                    // Update cart totals
+                    const subtotalEl = document.getElementById('subtotal');
+                    const totalEl = document.getElementById('total');
+                    
+                    if (subtotalEl) subtotalEl.textContent = formatPrice(data.cart_total);
+                    if (totalEl) totalEl.textContent = formatPrice(data.cart_total);
+                    
+                    // Update cart count in header
+                    updateCartCount(data.items_count);
+                } else {
+                    alert(data.message || 'Une erreur est survenue');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            });
+        }
+        
+        // Remove Cart Item
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Êtes-vous sûr de vouloir supprimer cet article de votre panier?')) {
+                    const itemId = this.getAttribute('data-item-id');
+                    
+                    fetch(`/api/cart/remove/${itemId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the item from the DOM
+                            const cartItem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+                            if (cartItem) cartItem.remove();
+                            
+                            // Update cart totals
+                            const subtotalEl = document.getElementById('subtotal');
+                            const totalEl = document.getElementById('total');
+                            
+                            if (subtotalEl) subtotalEl.textContent = formatPrice(data.cart_total);
+                            if (totalEl) totalEl.textContent = formatPrice(data.cart_total);
+                            
+                            // Update cart count in header
+                            updateCartCount(data.items_count);
+                            
+                            // Check if cart is empty
+                            if (data.items_count === 0) {
+                                location.reload();
+                            }
+                        } else {
+                            alert(data.message || 'Une erreur est survenue');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Une erreur est survenue. Veuillez réessayer.');
+                    });
+                }
+            });
+        });
+        
+        // Clear Cart
+        const clearCartBtn = document.getElementById('clear-cart');
+        if (clearCartBtn) {
+            clearCartBtn.addEventListener('click', function() {
+                if (confirm('Êtes-vous sûr de vouloir vider votre panier?')) {
+                    const items = document.querySelectorAll('.remove-item');
+                    let completed = 0;
+                    
+                    items.forEach(button => {
+                        const itemId = button.getAttribute('data-item-id');
+                        
+                        fetch(`/api/cart/remove/${itemId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            completed++;
+                            if (completed === items.length) {
+                                location.reload();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            completed++;
+                        });
+                    });
+                    
+                    if (items.length === 0) {
+                        location.reload();
+                    }
+                }
+            });
+        }
+        
+        // Apply Coupon
+        const applyCouponBtn = document.getElementById('apply-coupon');
+        if (applyCouponBtn) {
+            applyCouponBtn.addEventListener('click', function() {
+                const couponCode = document.getElementById('coupon-code').value.trim();
+                const messageDiv = document.getElementById('coupon-message');
+                
+                if (!couponCode) {
+                    if (messageDiv) {
+                        messageDiv.innerHTML = '<span class="text-red-500">Veuillez entrer un code promo.</span>';
+                    }
+                    return;
+                }
+                
+                fetch('{% url "apply_coupon" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ coupon_code: couponCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (messageDiv) {
+                        if (data.success) {
+                            messageDiv.innerHTML = '<span class="text-green-500">' + (data.message || 'Code promo appliqué') + '</span>';
+                            
+                            // Update discount and total
+                            const discountEl = document.getElementById('discount');
+                            const totalEl = document.getElementById('total');
+                            const subtotalEl = document.getElementById('subtotal');
+                            
+                            if (discountEl) {
+                                discountEl.textContent = formatPrice(data.discount_amount || 0);
+                            }
+                            
+                            // Update shipping if free shipping
+                            const shippingEl = document.getElementById('shipping');
+                            if (shippingEl && data.free_shipping) {
+                                shippingEl.textContent = 'Gratuite';
+                            }
+                            
+                            // Update total
+                            if (subtotalEl && totalEl) {
+                                const subtotal = parsePrice(subtotalEl.textContent);
+                                const discount = data.discount_amount || 0;
+                                const total = subtotal - discount;
+                                totalEl.textContent = formatPrice(total);
+                            }
+                        } else {
+                            messageDiv.innerHTML = '<span class="text-red-500">' + (data.message || 'Code promo invalide') + '</span>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (messageDiv) {
+                        messageDiv.innerHTML = '<span class="text-red-500">Une erreur est survenue. Veuillez réessayer.</span>';
+                    }
+                });
+            });
+        }
+        
+        // Function to update cart count in header
+        function updateCartCount(count) {
+            document.querySelectorAll('.cart-count, [data-cart-count]').forEach(el => {
+                el.textContent = count;
+                if (count === 0) {
+                    el.classList.add('hidden');
+                } else {
+                    el.classList.remove('hidden');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,606 @@
+{% extends 'base.html' %}
+
+{% block title %}Finaliser ma commande - Luxious Beautyland{% endblock %}
+{% block meta_description %}Finalisez votre commande sur Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Finaliser ma commande</h1>
+    
+    {% if cart.items.exists %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Checkout Form -->
+            <div class="lg:col-span-2">
+                <form id="checkout-form" method="POST" action="{% url 'create_order' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Shipping Address -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">Adresse de livraison</h2>
+                        
+                        {% if addresses %}
+                            <div class="space-y-3 mb-4">
+                                {% for address in addresses %}
+                                    <label class="flex items-start p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <input type="radio" name="shipping_address" value="{{ address.id }}" 
+                                               class="mt-1" {% if address.is_default_shipping or forloop.first %}checked{% endif %} required>
+                                        <div class="ml-3">
+                                            <div class="font-semibold">{{ address.first_name }} {{ address.last_name }}</div>
+                                            <div class="text-gray-600 text-sm">
+                                                {{ address.street }}{% if address.complement %}, {{ address.complement }}{% endif %}<br>
+                                                {{ address.postal_code }} {{ address.city }}, {{ address.country }}<br>
+                                                {{ address.phone }}
+                                            </div>
+                                            {% if address.is_default_shipping %}
+                                                <span class="inline-block mt-1 text-xs bg-primary text-white px-2 py-1 rounded">Adresse par défaut</span>
+                                            {% endif %}
+                                        </div>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                <button type="button" id="use-same-address" class="text-primary hover:text-secondary transition-colors">
+                                    <i class="fas fa-check-square mr-2"></i>Utiliser la même adresse pour la facturation
+                                </button>
+                                <a href="{% url 'address_create' %}" class="text-primary hover:text-secondary transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Ajouter une nouvelle adresse
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-6">
+                                <p class="mb-4">Vous n'avez pas encore d'adresse enregistrée.</p>
+                                <a href="{% url 'address_create' %}" class="inline-block bg-primary text-white px-6 py-2 rounded-md hover:bg-secondary transition-colors">
+                                    Ajouter une adresse
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Billing Address -->
+                    <div id="billing-address-section" class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">Adresse de facturation</h2>
+                        
+                        {% if addresses %}
+                            <div class="space-y-3">
+                                {% for address in addresses %}
+                                    <label class="flex items-start p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <input type="radio" name="billing_address" value="{{ address.id }}" 
+                                               class="mt-1" {% if address.is_default_billing or forloop.first %}checked{% endif %}>
+                                        <div class="ml-3">
+                                            <div class="font-semibold">{{ address.first_name }} {{ address.last_name }}</div>
+                                            <div class="text-gray-600 text-sm">
+                                                {{ address.street }}{% if address.complement %}, {{ address.complement }}{% endif %}<br>
+                                                {{ address.postal_code }} {{ address.city }}, {{ address.country }}<br>
+                                                {{ address.phone }}
+                                            </div>
+                                            {% if address.is_default_billing %}
+                                                <span class="inline-block mt-1 text-xs bg-primary text-white px-2 py-1 rounded">Adresse par défaut</span>
+                                            {% endif %}
+                                        </div>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Payment Method -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">Méthode de paiement</h2>
+                        
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" name="payment_method" value="fedapay" class="mr-3" checked>
+                                <div class="flex items-center flex-wrap gap-2">
+                                    <img src="https://fedapay.com/assets/img/logo.png" alt="FedaPay" class="h-8">
+                                    <div>
+                                        <div class="font-semibold">FedaPay</div>
+                                        <div class="text-sm text-gray-600">Paiement par Mobile Money (MTN, Moov) ou Carte</div>
+                                    </div>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" name="payment_method" value="cash_delivery" class="mr-3">
+                                <div class="flex items-center">
+                                    <i class="fas fa-money-bill-wave text-2xl mr-3 text-primary"></i>
+                                    <div>
+                                        <div class="font-semibold">Paiement à la livraison</div>
+                                        <div class="text-sm text-gray-600">Payez lors de la réception de votre commande</div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Notes -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">Notes de commande (optionnel)</h2>
+                        <textarea name="notes" rows="3" placeholder="Instructions spéciales pour votre commande..." 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary"></textarea>
+                    </div>
+                    
+                    <!-- Terms and Conditions -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <label class="flex items-start">
+                            <input type="checkbox" name="terms_accepted" class="mt-1 mr-3" required>
+                            <div class="text-sm">
+                                J'accepte les <a href="{% url 'page_detail' slug='terms' %}" class="text-primary hover:text-secondary transition-colors">conditions générales de vente</a>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <!-- Place Order Button -->
+                    <button type="submit" id="submit-order" class="w-full bg-primary text-white py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                        Passer la commande
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-20">
+                    <h2 class="text-xl font-semibold mb-4">Récapitulatif de la commande</h2>
+                    
+                    <!-- Cart Items -->
+                    <div class="space-y-4 mb-6 max-h-64 overflow-y-auto">
+                        {% for item in cart.items.all %}
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0">
+                                    {% if item.product %}
+                                        {% if item.product.images.all %}
+                                            {% with item.product.images.all|first as image %}
+                                                <img src="{{ image.image.url }}" alt="{{ item.product.name }}" class="w-16 h-16 object-cover rounded">
+                                            {% endwith %}
+                                        {% else %}
+                                            <img src="https://picsum.photos/seed/{{ item.product.id }}/100/100.jpg" alt="{{ item.product.name }}" class="w-16 h-16 object-cover rounded">
+                                        {% endif %}
+                                    {% elif item.service %}
+                                        {% if item.service.image %}
+                                            <img src="{{ item.service.image.url }}" alt="{{ item.service.name }}" class="w-16 h-16 object-cover rounded">
+                                        {% else %}
+                                            <img src="https://picsum.photos/seed/{{ item.service.id }}/100/100.jpg" alt="{{ item.service.name }}" class="w-16 h-16 object-cover rounded">
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex-grow">
+                                    <h4 class="font-semibold text-sm">
+                                        {% if item.product %}
+                                            {{ item.product.name|truncatechars:30 }}
+                                        {% elif item.service %}
+                                            {{ item.service.name|truncatechars:30 }}
+                                        {% endif %}
+                                    </h4>
+                                    <div class="text-xs text-gray-600">
+                                        Qté: {{ item.quantity }} x {{ item.price|floatformat:0 }} FCFA
+                                    </div>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <div class="font-semibold text-primary">{{ item.total|floatformat:0 }} FCFA</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Coupon Code -->
+                    <div class="mb-6">
+                        <h3 class="font-semibold mb-2">Code promo</h3>
+                        <div class="flex">
+                            <input type="text" id="coupon-code" placeholder="Entrez votre code promo" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-l focus:outline-none focus:border-primary">
+                            <button id="apply-coupon" class="bg-primary text-white px-4 py-2 rounded-r hover:bg-secondary transition-colors">
+                                Appliquer
+                            </button>
+                        </div>
+                        <div id="coupon-message" class="mt-2 text-sm"></div>
+                    </div>
+                    
+                    <!-- Order Totals -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span>Sous-total</span>
+                            <span id="subtotal" class="font-medium">{{ cart.total|floatformat:0 }} FCFA</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Livraison</span>
+                            <span id="shipping" class="text-gray-600">0 FCFA</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Réduction</span>
+                            <span id="discount" class="text-green-600">0 FCFA</span>
+                        </div>
+                        <div class="border-t pt-3">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Total</span>
+                                <span id="total" class="text-primary">{{ cart.total|floatformat:0 }} FCFA</span>
+                                <input type="hidden" id="grand-total" value="{{ cart.total|floatformat:0 }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Notice -->
+                    <div class="text-center text-sm text-gray-600">
+                        <i class="fas fa-lock mr-2"></i>Paiement sécurisé par FedaPay
+                        <img src="https://fedapay.com/assets/img/logo-sm.png" alt="FedaPay" class="h-6 mx-auto mt-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow-md p-8 text-center">
+            <div class="mb-6">
+                <i class="fas fa-shopping-cart text-6xl text-gray-300"></i>
+            </div>
+            <h2 class="text-2xl font-semibold mb-4">Votre panier est vide</h2>
+            <p class="text-gray-600 mb-6">Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.</p>
+            <a href="{% url 'product_list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                Commencer vos achats
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Order Processing Modal -->
+<div id="order-processing-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <div class="text-center">
+            <div class="mb-4">
+                <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Traitement de votre commande</h3>
+            <p class="text-gray-600">Veuillez patienter pendant que nous traitons votre commande...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
+<script>
+    // Configuration FedaPay
+    const FEDAPAY_PUBLIC_KEY = 'pk_live_W2rHbWgvHU8xti08I6awZ5-k';
+    const SITE_DOMAIN = window.location.hostname;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Format price with thousands separator
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', {
+                maximumFractionDigits: 0,
+                minimumFractionDigits: 0
+            }).format(price) + ' FCFA';
+        }
+
+        // Parse price string to number
+        function parsePrice(priceStr) {
+            return parseFloat(priceStr.replace(/[^\d]/g, '')) || 0;
+        }
+
+        // Get numeric total from DOM
+        function getNumericTotal() {
+            const totalEl = document.getElementById('total');
+            if (totalEl) {
+                return parsePrice(totalEl.textContent);
+            }
+            return parseFloat(document.getElementById('grand-total')?.value || '{{ cart.total|floatformat:0 }}');
+        }
+
+        // Use Same Address Toggle
+        const useSameAddressBtn = document.getElementById('use-same-address');
+        if (useSameAddressBtn) {
+            useSameAddressBtn.addEventListener('click', function() {
+                const billingSection = document.getElementById('billing-address-section');
+                const icon = this.querySelector('i');
+                
+                if (billingSection.style.display === 'none') {
+                    billingSection.style.display = 'block';
+                    icon.classList.remove('fa-square');
+                    icon.classList.add('fa-check-square');
+                } else {
+                    billingSection.style.display = 'none';
+                    icon.classList.remove('fa-check-square');
+                    icon.classList.add('fa-square');
+                    
+                    // Copy shipping address to billing address
+                    const shippingAddress = document.querySelector('input[name="shipping_address"]:checked');
+                    if (shippingAddress) {
+                        const billingAddress = document.querySelector(`input[name="billing_address"][value="${shippingAddress.value}"]`);
+                        if (billingAddress) {
+                            billingAddress.checked = true;
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Apply Coupon
+        const applyCouponBtn = document.getElementById('apply-coupon');
+        if (applyCouponBtn) {
+            applyCouponBtn.addEventListener('click', function() {
+                const couponCode = document.getElementById('coupon-code').value.trim();
+                const messageDiv = document.getElementById('coupon-message');
+                
+                if (!couponCode) {
+                    if (messageDiv) {
+                        messageDiv.innerHTML = '<span class="text-red-500">Veuillez entrer un code promo.</span>';
+                    }
+                    return;
+                }
+                
+                fetch('{% url "apply_coupon" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ coupon_code: couponCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (messageDiv) {
+                        if (data.success) {
+                            messageDiv.innerHTML = '<span class="text-green-500">' + (data.message || 'Code promo appliqué') + '</span>';
+                            
+                            // Update discount
+                            const discountEl = document.getElementById('discount');
+                            if (discountEl) {
+                                discountEl.textContent = formatPrice(data.discount_amount || 0);
+                            }
+                            
+                            // Update shipping if free shipping
+                            const shippingEl = document.getElementById('shipping');
+                            if (shippingEl && data.free_shipping) {
+                                shippingEl.textContent = '0 FCFA';
+                            }
+                            
+                            // Update total
+                            const subtotalEl = document.getElementById('subtotal');
+                            const totalEl = document.getElementById('total');
+                            const grandTotalInput = document.getElementById('grand-total');
+                            
+                            if (subtotalEl && totalEl) {
+                                const subtotal = parsePrice(subtotalEl.textContent);
+                                const discount = data.discount_amount || 0;
+                                const total = subtotal - discount;
+                                totalEl.textContent = formatPrice(total);
+                                if (grandTotalInput) {
+                                    grandTotalInput.value = total;
+                                }
+                            }
+                        } else {
+                            messageDiv.innerHTML = '<span class="text-red-500">' + (data.message || 'Code promo invalide') + '</span>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (messageDiv) {
+                        messageDiv.innerHTML = '<span class="text-red-500">Une erreur est survenue. Veuillez réessayer.</span>';
+                    }
+                });
+            });
+        }
+        
+        // Checkout Form Submit with FedaPay
+        const checkoutForm = document.getElementById('checkout-form');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Validate form
+                const shippingAddress = document.querySelector('input[name="shipping_address"]:checked');
+                const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+                const termsAccepted = document.querySelector('input[name="terms_accepted"]:checked');
+                
+                if (!shippingAddress) {
+                    alert('Veuillez sélectionner une adresse de livraison.');
+                    return;
+                }
+                
+                const billingSection = document.getElementById('billing-address-section');
+                const billingAddress = document.querySelector('input[name="billing_address"]:checked');
+                
+                if (billingSection && billingSection.style.display !== 'none' && !billingAddress) {
+                    alert('Veuillez sélectionner une adresse de facturation.');
+                    return;
+                }
+                
+                if (!paymentMethod) {
+                    alert('Veuillez sélectionner une méthode de paiement.');
+                    return;
+                }
+                
+                if (!termsAccepted) {
+                    alert('Veuillez accepter les conditions générales de vente.');
+                    return;
+                }
+                
+                // Show processing modal
+                const modal = document.getElementById('order-processing-modal');
+                if (modal) modal.classList.remove('hidden');
+                
+                // Prepare form data
+                const formData = {
+                    shipping_address_id: shippingAddress.value,
+                    billing_address_id: billingAddress ? billingAddress.value : shippingAddress.value,
+                    payment_method: paymentMethod.value,
+                    notes: document.querySelector('textarea[name="notes"]')?.value || '',
+                    terms_accepted: termsAccepted.checked
+                };
+                
+                try {
+                    if (paymentMethod.value === 'fedapay') {
+                        // Create order first
+                        const orderResponse = await fetch('{% url "create_order" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                ...formData,
+                                status: 'pending_payment'
+                            })
+                        });
+                        
+                        const orderData = await orderResponse.json();
+                        
+                        if (!orderData.success) {
+                            throw new Error(orderData.message || 'Erreur lors de la création de la commande');
+                        }
+                        
+                        // Hide processing modal before opening FedaPay
+                        if (modal) modal.classList.add('hidden');
+                        
+                        // Get user info
+                        let userFullName = '{{ user.get_full_name|default:user.username|escapejs }}';
+                        let userEmail = '{{ user.email|escapejs }}';
+                        let userPhone = '{{ user.phone|default:""|escapejs }}';
+                        
+                        // Clean phone number - remove all non-digits
+                        userPhone = userPhone.replace(/\D/g, '');
+                        
+                        // Split name for firstname/lastname
+                        const nameParts = userFullName.split(' ');
+                        const firstname = nameParts[0] || 'Client';
+                        const lastname = nameParts.slice(1).join(' ') || userFullName;
+                        
+                        // Get total amount (supports up to 1 million+)
+                        const totalAmount = Math.round(getNumericTotal());
+                        
+                        console.log('Processing payment for:', totalAmount, 'FCFA');
+                        
+                        // Initialize FedaPay with proper error handling
+                        try {
+                            const fedapay = FedaPay.init({
+                                public_key: FEDAPAY_PUBLIC_KEY,
+                                environment: 'live',
+                                transaction: {
+                                    amount: totalAmount,
+                                    description: `Commande #${orderData.order_number || orderData.order_id}`,
+                                    custom_metadata: {
+                                        order_id: orderData.order_id,
+                                        order_number: orderData.order_number || '',
+                                        site: SITE_DOMAIN
+                                    }
+                                },
+                                customer: {
+                                    firstname: firstname,
+                                    lastname: lastname,
+                                    email: userEmail,
+                                    phone_number: {
+                                        number: userPhone || '0000000000',
+                                        country: 'TG'
+                                    }
+                                },
+                                onComplete: function(response) {
+                                    if (response.reason === FedaPay.CHECKOUT_COMPLETED) {
+                                        // Payment successful
+                                        confirmPayment(orderData.order_id, response.transaction);
+                                    } else if (response.reason === FedaPay.DIALOG_DISMISSED) {
+                                        // Payment cancelled
+                                        cancelOrder(orderData.order_id);
+                                    }
+                                },
+                                onError: function(error) {
+                                    console.error('FedaPay error:', error);
+                                    alert('Erreur de paiement: ' + (error.message || 'Veuillez réessayer'));
+                                    if (modal) modal.classList.add('hidden');
+                                }
+                            });
+                            
+                            // Open FedaPay checkout with a small delay
+                            setTimeout(() => {
+                                fedapay.open();
+                            }, 100);
+                            
+                        } catch (fedapayError) {
+                            console.error('FedaPay init error:', fedapayError);
+                            alert('Erreur lors de l\'initialisation du paiement. Veuillez réessayer.');
+                            if (modal) modal.classList.add('hidden');
+                        }
+                        
+                    } else {
+                        // Cash on delivery - create order directly
+                        const orderResponse = await fetch('{% url "create_order" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        const orderData = await orderResponse.json();
+                        
+                        if (orderData.success) {
+                            window.location.href = orderData.redirect_url;
+                        } else {
+                            throw new Error(orderData.message || 'Erreur lors de la création de la commande');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    if (modal) modal.classList.add('hidden');
+                    alert(error.message || 'Une erreur est survenue lors du traitement de votre commande. Veuillez réessayer.');
+                }
+            });
+        }
+    });
+    
+    // Confirm payment after successful FedaPay transaction
+    async function confirmPayment(orderId, transaction) {
+        try {
+            const confirmUrl = "{% url 'confirm_order_payment' 0 %}".replace('0', orderId);
+            
+            const response = await fetch(confirmUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    transaction_id: transaction.id,
+                    payment_method: 'fedapay',
+                    status: 'paid'
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                window.location.href = data.redirect_url || "{% url 'order_list' %}";
+            } else {
+                throw new Error(data.message || 'Erreur de confirmation');
+            }
+        } catch (error) {
+            console.error('Error confirming payment:', error);
+            alert('Paiement réussi mais erreur lors de la confirmation. Contactez le support.');
+            window.location.href = '{% url "order_list" %}';
+        }
+    }
+    
+    // Cancel order if payment is dismissed
+    async function cancelOrder(orderId) {
+        try {
+            const cancelUrl = "{% url 'api_order_cancel' 0 %}".replace('0', orderId);
+            
+            await fetch(cancelUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+        } catch (error) {
+            console.error('Error cancelling order:', error);
+        }
+    }
+</script>
+{% endblock %}

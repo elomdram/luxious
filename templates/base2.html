@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxious Beautyland | Institut de Beauté & Spa Haut de Gamme</title>
+    <meta name="description" content="Institut de beauté haut de gamme proposant soins du visage, massages, épilations et produits de luxe. Découvrez notre univers d'exception.">
+    
+    <!-- Préchargement des polices et ressources critiques -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icône favicon -->
+    <link rel="icon" href="https://via.placeholder.com/64" type="image/png">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" href="{% static "css/styles.css" %}">
+</head>
+<body>
+
+    <!-- Barre de navigation supérieure -->
+    <div class="top-bar">
+        <div class="container">
+            <ul class="top-links">
+                <li><a href="#" aria-label="Trouver un institut"><i class="fas fa-map-marker-alt"></i> <span class="link-text">Trouver un institut</span></a></li>
+                <li><a href="#" aria-label="Mon compte"><i class="fas fa-user"></i> <span class="link-text">Mon compte</span></a></li>
+                <li><a href="#" aria-label="Favoris"><i class="fas fa-heart"></i> <span class="link-text">Favoris</span></a></li>
+                <li><a href="{% url 'cart' %}"><i class="fas fa-shopping-bag"></i> Panier (<span class="cart-count">0</span>)</a></li>
+            </ul>
+            
+            <button class="mobile-menu-toggle" aria-label="Menu mobile" aria-expanded="false">
+                <span class="menu-icon"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Logo et navigation principale -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <a href="{% url 'home' %}" aria-label="Luxious Beautyland - Accueil">
+                    <img src="{% static "images/luxious-beautyland.zoom_.png" %}" 
+                         alt="Luxious Beautyland - Logo" 
+                         width="100" 
+                         height="20">
+                </a>
+            </div>
+            
+            <nav class="main-nav" aria-label="Navigation principale">
+                <ul>
+                    <li><a href="#">Soins du visage</a></li>
+                    <li><a href="#">Massages</a></li>
+                    <li><a href="#">Épilations</a></li>
+                    <li><a href="#">Maquillage</a></li>
+                    <li><a href="#">Onglerie</a></li>
+                    <li><a href="#">Nos forfaits</a></li>
+                    <li><a href="#">Marques</a></li>
+                    <li><a href="#">Promotions</a></li>
+                </ul>
+            </nav>
+            
+            <div class="search-box">
+                <label for="search-input" class="sr-only">Rechercher</label>
+                <input type="text" id="search-input" placeholder="Rechercher un soin, un produit...">
+                <button aria-label="Rechercher"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </header>
+
+    {%  block content %}
+    {% endblock %}
+
+
+    <!-- Pied de page -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>Services</h3>
+                    <ul>
+                        <li><a href="#">Soins du visage</a></li>
+                        <li><a href="#">Massages</a></li>
+                        <li><a href="#">Épilations</a></li>
+                        <li><a href="#">Maquillage</a></li>
+                        <li><a href="#">Onglerie</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>L'institut</h3>
+                    <ul>
+                        <li><a href="#">Notre histoire</a></li>
+                        <li><a href="#">Nos experts</a></li>
+                        <li><a href="#">Nos engagements</a></li>
+                        <li><a href="#">Recrutement</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Informations</h3>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Conditions générales</a></li>
+                        <li><a href="#">Politique de confidentialité</a></li>
+                        <li><a href="#">Mentions légales</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact</h3>
+                    <address>
+                        <p><i class="fas fa-map-marker-alt"></i> Amandahomé, Lomé - Togo</p>
+                        <p><i class="fas fa-phone"></i> +229 90 71 29 28 </p>
+                        <p><i class="fas fa-envelope"></i> contact@luxiousbeautyland.com</p>
+                    </address>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Luxious Beautyland. Tous droits réservés.</p>
+                <div class="payment-methods">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-paypal"></i>
+                    <i class="fab fa-cc-amex"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="{% static "js/script.js" %} "></script>
+
+</body>
+</html>

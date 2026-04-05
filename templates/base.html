@@ -1,0 +1,437 @@
+<!-- base.html - Version corrigée -->
+{% load static%}
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Luxious Beautyland{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Découvrez les meilleurs produits et services de beauté chez Luxious Beautyland{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}beauté, cosmétiques, soins, produits de beauté{% endblock %}">
+    <meta name="author" content="Luxious Beautyland">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% block og_title %}Luxious Beautyland{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Découvrez les meilleurs produits et services de beauté{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'images/og-default.jpg' %}{% endblock %}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="{% block twitter_title %}Luxious Beautyland{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Découvrez les meilleurs produits et services de beauté{% endblock %}">
+    <meta property="twitter:image" content="{% block twitter_image %}{% static 'images/og-default.jpg' %}{% endblock %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#EC4899',
+                        'secondary': '#F472B6',
+                        'accent': '#F9A8D4',
+                        'dark': '#1F2937',
+                        'light': '#F9FAFB',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        /* Custom animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #EC4899;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #F472B6;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="font-sans text-gray-700 antialiased">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                    <img src="{% static 'images/logo.png' %}" alt="Luxious Beautyland" class="h-10 w-auto">
+                </a>
+                
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="{% url 'home' %}" class="text-gray-700 hover:text-primary transition-colors">Accueil</a>
+                    <a href="{% url 'product_list' %}" class="text-gray-700 hover:text-primary transition-colors">Produits</a>
+                    <a href="{% url 'service_list' %}" class="text-gray-700 hover:text-primary transition-colors">Services</a>
+                    <a href="{% url 'blog_list' %}" class="text-gray-700 hover:text-primary transition-colors">Blog</a>
+                    <a href="{% url 'page_detail' slug='contact' %}" class="text-gray-700 hover:text-primary transition-colors">Contact</a>
+                </nav>
+                
+                <!-- User Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- Search -->
+                    <button id="search-toggle" class="text-gray-700 hover:text-primary transition-colors">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    
+                    <!-- User Account -->
+                    {% if user.is_authenticated %}
+                        <div class="relative">
+                            <button id="user-menu-toggle" class="text-gray-700 hover:text-primary transition-colors">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mon profil</a>
+                                <a href="{% url 'order_list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mes commandes</a>
+                                <a href="{% url 'booking_list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mes réservations</a>
+                                <a href="{% url 'address_list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mes adresses</a>
+                                <a href="{% url 'wishlist' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ma wishlist</a>
+                                <hr class="my-1">
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Déconnexion</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition-colors">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    {% endif %}
+                    
+                    <!-- Wishlist -->
+                    <a href="{% url 'wishlist' %}" class="text-gray-700 hover:text-primary transition-colors relative">
+                        <i class="fas fa-heart"></i>
+                        {% if user.is_authenticated and user.wishlist %}
+                            <span class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ user.wishlist.products.count|add:user.wishlist.services.count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    
+                    <!-- Cart -->
+                    <a href="{% url 'cart' %}" class="text-gray-700 hover:text-primary transition-colors relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if user.is_authenticated and user.cart %}
+                            <span class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ user.cart.items_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    
+                    <!-- Mobile Menu Toggle -->
+                    <button id="mobile-menu-toggle" class="md:hidden text-gray-700 hover:text-primary transition-colors">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="{% url 'home' %}" class="block py-2 text-gray-700 hover:text-primary transition-colors">Accueil</a>
+                <a href="{% url 'product_list' %}" class="block py-2 text-gray-700 hover:text-primary transition-colors">Produits</a>
+                <a href="{% url 'service_list' %}" class="block py-2 text-gray-700 hover:text-primary transition-colors">Services</a>
+                <a href="{% url 'blog_list' %}" class="block py-2 text-gray-700 hover:text-primary transition-colors">Blog</a>
+                <a href="{% url 'page_detail' slug='contact' %}" class="block py-2 text-gray-700 hover:text-primary transition-colors">Contact</a>
+                
+                {% if not user.is_authenticated %}
+                    <div class="pt-4 border-t border-gray-200">
+                        <a href="{% url 'login' %}" class="block py-2 text-gray-700 hover:text-primary transition-colors">Connexion</a>
+                        <a href="{% url 'register' %}" class="block py-2 text-gray-700 hover:text-primary transition-colors">Inscription</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div id="search-bar" class="hidden bg-white border-t border-gray-200 py-4">
+            <div class="container mx-auto px-4">
+                <form action="{% url 'search' %}" method="get" class="relative">
+                    <input type="text" name="q" placeholder="Rechercher des produits, services..." 
+                           class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                    <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mx-auto px-4 mt-4">
+            {% for message in messages %}
+                <div class="p-4 mb-4 rounded-md fade-in {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Newsletter -->
+    {% if 'newsletter' not in request.path %}
+        <section class="bg-primary text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="max-w-2xl mx-auto text-center">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4">Abonnez-vous à notre newsletter</h2>
+                    <p class="mb-6">Recevez nos dernières offres et nouveautés directement dans votre boîte de réception</p>
+                    <form id="newsletter-form" class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                        {% csrf_token %}
+                        <input type="email" name="email" placeholder="Votre adresse email" required
+                               class="flex-1 px-4 py-2 rounded-md text-gray-800 focus:outline-none">
+                        <button type="submit" class="bg-dark text-white px-6 py-2 rounded-md hover:bg-gray-800 transition-colors">
+                            S'abonner
+                        </button>
+                    </form>
+                    <div id="newsletter-message" class="mt-4"></div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- About -->
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="{% static 'images/logo.png' %}" alt="Luxious Beautyland" class="h-8 w-auto">
+                        <span class="text-xl font-bold">Luxious Beautyland</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">Votre destination de confiance pour les produits et services de beauté de qualité.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Liens rapides</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'product_list' %}" class="text-gray-400 hover:text-white transition-colors">Produits</a></li>
+                        <li><a href="{% url 'service_list' %}" class="text-gray-400 hover:text-white transition-colors">Services</a></li>
+                        <li><a href="{% url 'blog_list' %}" class="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="{% url 'page_detail' slug='about' %}" class="text-gray-400 hover:text-white transition-colors">À propos</a></li>
+                        <li><a href="{% url 'page_detail' slug='contact' %}" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Customer Service -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Service client</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'page_detail' slug='faq' %}" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="{% url 'page_detail' slug='shipping' %}" class="text-gray-400 hover:text-white transition-colors">Livraison</a></li>
+                        <li><a href="{% url 'page_detail' slug='returns' %}" class="text-gray-400 hover:text-white transition-colors">Retours</a></li>
+                        <li><a href="{% url 'page_detail' slug='payment' %}" class="text-gray-400 hover:text-white transition-colors">Paiement</a></li>
+                        <li><a href="{% url 'page_detail' slug='terms' %}" class="text-gray-400 hover:text-white transition-colors">Conditions générales</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contactez-nous</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-2"></i>
+                            <span>Amandahomé, Lomé, Togo</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2"></i>
+                            <span>+228 90 71 29 28</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            <span>contact@Luxiousbeautyland.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-6 text-center text-gray-400">
+                <p>&copy; {% now "Y" %} Luxious Beautyland. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-secondary transition-colors z-40 hidden">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Attendre que le DOM soit complètement chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Mobile Menu Toggle
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    if (mobileMenu) {
+                        mobileMenu.classList.toggle('hidden');
+                    }
+                });
+            }
+            
+            // User Menu Toggle (seulement si l'utilisateur est authentifié)
+            const userMenuToggle = document.getElementById('user-menu-toggle');
+            if (userMenuToggle) {
+                userMenuToggle.addEventListener('click', function() {
+                    const userMenu = document.getElementById('user-menu');
+                    if (userMenu) {
+                        userMenu.classList.toggle('hidden');
+                    }
+                });
+            }
+            
+            // Search Toggle
+            const searchToggle = document.getElementById('search-toggle');
+            if (searchToggle) {
+                searchToggle.addEventListener('click', function() {
+                    const searchBar = document.getElementById('search-bar');
+                    if (searchBar) {
+                        searchBar.classList.toggle('hidden');
+                        if (!searchBar.classList.contains('hidden')) {
+                            const searchInput = searchBar.querySelector('input');
+                            if (searchInput) {
+                                setTimeout(() => searchInput.focus(), 100);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Back to Top Button
+            const backToTop = document.getElementById('back-to-top');
+            if (backToTop) {
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 300) {
+                        backToTop.classList.remove('hidden');
+                    } else {
+                        backToTop.classList.add('hidden');
+                    }
+                });
+                
+                backToTop.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+            
+            // Newsletter Form
+            const newsletterForm = document.getElementById('newsletter-form');
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const email = this.querySelector('input[name="email"]').value;
+                    const messageDiv = document.getElementById('newsletter-message');
+                    const csrfToken = this.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
+                    
+                    fetch('{% url "newsletter_subscribe" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ email: email })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (messageDiv) {
+                            if (data.success) {
+                                messageDiv.innerHTML = '<div class="text-green-300">' + data.message + '</div>';
+                                this.querySelector('input[name="email"]').value = '';
+                            } else {
+                                messageDiv.innerHTML = '<div class="text-red-300">' + data.message + '</div>';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        if (messageDiv) {
+                            messageDiv.innerHTML = '<div class="text-red-300">Une erreur est survenue. Veuillez réessayer.</div>';
+                        }
+                    });
+                });
+            }
+        });
+        
+        // Fermer le menu utilisateur quand on clique ailleurs
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('user-menu');
+            const userMenuToggle = document.getElementById('user-menu-toggle');
+            
+            if (userMenu && userMenuToggle) {
+                if (!userMenuToggle.contains(event.target) && !userMenu.contains(event.target)) {
+                    userMenu.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Luxious Beautyland{% endblock %}
+{% block meta_description %}{{ product.short_description }} - Découvrez ce produit de beauté chez Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-gray-600">
+            <li><a href="{% url 'home' %}" class="hover:text-primary">Accueil</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li><a href="{% url 'product_list' %}" class="hover:text-primary">Produits</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li class="text-gray-800">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Product Images -->
+        <div class="space-y-4">
+            <!-- Main Image -->
+            <div class="relative">
+                {% if product.images.all %}
+                    {% with product.images.all|first as main_image %}
+                        <img id="main-image" src="{{ main_image.image.url }}" alt="{{ product.name }}" 
+                             class="w-full h-96 object-cover rounded-lg">
+                    {% endwith %}
+                {% else %}
+                    <img id="main-image" src="https://picsum.photos/seed/{{ product.id }}/600/600.jpg" alt="{{ product.name }}" 
+                         class="w-full h-96 object-cover rounded-lg">
+                {% endif %}
+                
+                {% if product.is_new %}
+                    <span class="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm">Nouveau</span>
+                {% endif %}
+                
+                {% if product.get_discount_percentage > 0 %}
+                    <span class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm">-{{ product.get_discount_percentage }}%</span>
+                {% endif %}
+            </div>
+            
+            <!-- Thumbnail Images -->
+            <div class="flex space-x-2 overflow-x-auto">
+                {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" alt="{{ product.name }}" 
+                         class="w-20 h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity"
+                         onclick="changeMainImage('{{ image.image.url }}')">
+                {% endfor %}
+                <img src="https://picsum.photos/seed/{{ product.id }}-2/100/100.jpg" alt="{{ product.name }}" 
+                     class="w-20 h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity"
+                     onclick="changeMainImage('https://picsum.photos/seed/{{ product.id }}-2/600/600.jpg')">
+            </div>
+        </div>
+        
+        <!-- Product Info -->
+        <div>
+            <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
+            
+            <!-- Price -->
+            <div class="flex items-center mb-4">
+                {% if product.compare_price %}
+                    <span class="text-gray-500 line-through text-xl mr-3">{{ product.compare_price }} FCFA</span>
+                    <span class="text-3xl font-bold text-primary">{{ product.price }} FCFA</span>
+                {% else %}
+                    <span class="text-3xl font-bold text-primary">{{ product.price }} FCFA</span>
+                {% endif %}
+            </div>
+            
+            <!-- Rating -->
+            <div class="flex items-center mb-6">
+                <div class="flex text-yellow-400 mr-3">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= average_rating|floatformat:0 %}
+                            <i class="fas fa-star"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="text-gray-600">{{ average_rating|floatformat:1 }} ({{ reviews.count }} avis)</span>
+            </div>
+            
+            <!-- Description -->
+            <p class="text-gray-700 mb-6">{{ product.description|safe }}</p>
+            
+            <!-- Product Variants -->
+            {% if product.variants.exists %}
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Options</h3>
+                    <div id="product-variants" class="space-y-3">
+                        {% for variant in product.variants.all %}
+                            <div class="flex items-center justify-between p-3 border rounded cursor-pointer hover:border-primary"
+                                 onclick="selectVariant({{ variant.id }})">
+                                <div>
+                                    {% for option in variant.options.all %}
+                                        <span class="text-sm">{{ option.name }}: {{ option.value }}</span>
+                                        {% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="text-right">
+                                    {% if variant.price %}
+                                        <span class="font-semibold">{{ variant.price }} FCFA</span>
+                                    {% else %}
+                                        <span class="font-semibold">{{ product.price }} FCFA</span>
+                                    {% endif %}
+                                    {% if variant.quantity <= 0 %}
+                                        <span class="text-red-500 text-sm">Rupture</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Stock Status -->
+            <div class="mb-6">
+                {% if product.track_quantity %}
+                    {% if product.quantity > 0 %}
+                        {% if product.quantity <= product.low_stock_threshold %}
+                            <div class="flex items-center text-yellow-600">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                <span>Plus que {{ product.quantity }} en stock</span>
+                            </div>
+                        {% else %}
+                            <div class="flex items-center text-green-600">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span>En stock</span>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        {% if product.allow_backorder %}
+                            <div class="flex items-center text-blue-600">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span>Précommande disponible</span>
+                            </div>
+                        {% else %}
+                            <div class="flex items-center text-red-600">
+                                <i class="fas fa-times-circle mr-2"></i>
+                                <span>Rupture de stock</span>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <!-- Quantity and Add to Cart -->
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="flex items-center">
+                    <button onclick="decreaseQuantity()" class="bg-gray-200 text-gray-700 px-3 py-2 rounded-l hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" id="quantity" value="1" min="1" 
+                           class="w-16 text-center border-t border-b border-gray-200 py-2">
+                    <button onclick="increaseQuantity()" class="bg-gray-200 text-gray-700 px-3 py-2 rounded-r hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                
+                <button id="add-to-cart-btn" onclick="addToCart()" 
+                        class="flex-1 bg-primary text-white py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                    <i class="fas fa-shopping-cart mr-2"></i>Ajouter au panier
+                </button>
+                
+                <button onclick="toggleWishlist({{ product.id }}, 'product')" 
+                        class="bg-gray-100 text-gray-700 p-3 rounded-md hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+            
+            <!-- Product Features -->
+            <div class="border-t pt-6">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-shipping-fast text-primary mr-2"></i>
+                        <span>Livraison 24-48h</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-shield-alt text-primary mr-2"></i>
+                        <span>Garantie satisfait</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-undo text-primary mr-2"></i>
+                        <span>Retour 30 jours</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-certificate text-primary mr-2"></i>
+                        <span>Produit certifié</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Details Tabs -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="border-b mb-6">
+            <nav class="flex space-x-8">
+                <button class="tab-btn py-2 border-b-2 border-primary text-primary font-semibold" data-tab="description">
+                    Description
+                </button>
+                <button class="tab-btn py-2 border-b-2 border-transparent text-gray-600 hover:text-primary" data-tab="ingredients">
+                    Ingrédients
+                </button>
+                <button class="tab-btn py-2 border-b-2 border-transparent text-gray-600 hover:text-primary" data-tab="usage">
+                    Mode d'emploi
+                </button>
+                <button class="tab-btn py-2 border-b-2 border-transparent text-gray-600 hover:text-primary" data-tab="reviews">
+                    Avis ({{ reviews.count }})
+                </button>
+            </nav>
+        </div>
+        
+        <div class="tab-content">
+            <div id="description-tab" class="tab-pane">
+                <div class="prose max-w-none">
+                    {{ product.description|safe }}
+                </div>
+            </div>
+            
+            <div id="ingredients-tab" class="tab-pane hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for attribute in product.attributes.all %}
+                        {% if 'ingredient' in attribute.name.lower %}
+                            <div>
+                                <h4 class="font-semibold mb-2">{{ attribute.name }}</h4>
+                                <p class="text-gray-600">{{ attribute.value }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="usage-tab" class="tab-pane hidden">
+                <div class="space-y-4">
+                    {% for attribute in product.attributes.all %}
+                        {% if 'usage' in attribute.name.lower or 'instruction' in attribute.name.lower %}
+                            <div>
+                                <h4 class="font-semibold mb-2">{{ attribute.name }}</h4>
+                                <p class="text-gray-600">{{ attribute.value }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="reviews-tab" class="tab-pane hidden">
+                {% include 'reviews/partials/review_list.html' %}
+                
+                {% if user.is_authenticated %}
+                    <div class="mt-8">
+                        <button class="bg-primary text-white px-6 py-2 rounded-md font-semibold hover:bg-secondary transition-colors"
+                                onclick="showReviewForm()">
+                            <i class="fas fa-plus mr-2"></i>Ajouter un avis
+                        </button>
+                    </div>
+                    
+                    <div id="review-form-container" class="hidden mt-6">
+                        {% include 'reviews/partials/review_form.html' %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Products -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold mb-6">Produits similaires</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for related_product in related_products %}
+                {% include 'products/partials/product_card.html' %}
+            {% empty %}
+                <p class="col-span-full text-center text-gray-500">Aucun produit similaire trouvé.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedVariantId = null;
+    
+    // Image Gallery
+    function changeMainImage(imageUrl) {
+        document.getElementById('main-image').src = imageUrl;
+    }
+    
+    // Quantity Controls
+    function increaseQuantity() {
+        const input = document.getElementById('quantity');
+        input.value = parseInt(input.value) + 1;
+    }
+    
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+    
+    // Variant Selection
+    function selectVariant(variantId) {
+        selectedVariantId = variantId;
+        
+        // Update UI
+        document.querySelectorAll('#product-variants > div').forEach(div => {
+            div.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
+            div.classList.add('border-gray-200');
+        });
+        
+        event.currentTarget.classList.remove('border-gray-200');
+        event.currentTarget.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
+        
+        // Check availability
+        checkProductAvailability(variantId);
+    }
+    
+    // Check Product Availability
+    function checkProductAvailability(variantId) {
+        fetch(`/api/products/{{ product.id }}/availability/?variant_id=${variantId}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const addBtn = document.getElementById('add-to-cart-btn');
+                if (data.is_available) {
+                    addBtn.disabled = false;
+                    addBtn.textContent = 'Ajouter au panier';
+                    addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    addBtn.disabled = true;
+                    addBtn.textContent = data.message;
+                    addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+    // Add to Cart
+    function addToCart() {
+        const quantity = parseInt(document.getElementById('quantity').value);
+        
+        fetch('{% url "add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'product_id': {{ product.id }},
+                'variant_id': selectedVariantId,
+                'quantity': quantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count
+                document.querySelectorAll('.fa-shopping-cart').forEach(el => {
+                    const badge = el.nextElementSibling;
+                    if (badge) {
+                        badge.textContent = data.cart_items_count;
+                    }
+                });
+                
+                // Show success message
+                showNotification('Produit ajouté au panier', 'success');
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Une erreur est survenue. Veuillez réessayer.', 'error');
+        });
+    }
+    
+    // Tab Navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            
+            // Update button styles
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('border-primary', 'text-primary', 'font-semibold');
+                b.classList.add('border-transparent', 'text-gray-600');
+            });
+            this.classList.remove('border-transparent', 'text-gray-600');
+            this.classList.add('border-primary', 'text-primary', 'font-semibold');
+            
+            // Show/hide tab content
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+        });
+    });
+    
+    // Review Functions
+    function showReviewForm() {
+        const formContainer = document.getElementById('review-form-container');
+        formContainer.classList.toggle('hidden');
+        
+        // Switch to reviews tab
+        document.querySelector('[data-tab="reviews"]').click();
+    }
+    
+    // Rating Stars
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            document.querySelectorAll('.rating-star').forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('far');
+                    s.classList.add('fas', 'text-yellow-400');
+                } else {
+                    s.classList.remove('fas', 'text-yellow-400');
+                    s.classList.add('far');
+                }
+            });
+            document.querySelector('input[name="rating"][value="' + rating + '"]').checked = true;
+        });
+    });
+    
+    // Notification Function
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 fade-in ${
+            type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}Ma liste de souhaits - Luxious Beautyland{% endblock %}
+{% block meta_description %}Consultez votre liste de souhaits et ajoutez des produits à votre panier sur Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Ma liste de souhaits</h1>
+    
+    {% if wishlist_items.products or wishlist_items.services %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Products -->
+            {% for product in wishlist_items.products %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="relative">
+                        {% if product.images.all %}
+                            {% with product.images.all|first as image %}
+                                <img src="{{ image.image.url }}" alt="{{ product.name }}" class="w-full h-64 object-cover">
+                            {% endwith %}
+                        {% else %}
+                            <img src="https://picsum.photos/seed/{{ product.id }}/400/300.jpg" alt="{{ product.name }}" class="w-full h-64 object-cover">
+                        {% endif %}
+                        
+                        {% if product.is_new %}
+                            <span class="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 text-xs rounded">Nouveau</span>
+                        {% endif %}
+                        
+                        {% if product.get_discount_percentage > 0 %}
+                            <span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded">-{{ product.get_discount_percentage }}%</span>
+                        {% endif %}
+                        
+                        <button class="absolute bottom-2 right-2 bg-white text-red-500 p-2 rounded-full shadow-md hover:bg-red-500 hover:text-white transition-colors"
+                                onclick="toggleWishlist({{ product.id }}, 'product')">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-2">{{ product.name }}</h3>
+                        <p class="text-gray-600 text-sm mb-3">{{ product.short_description|truncatechars:80 }}</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                {% if product.compare_price %}
+                                    <span class="text-gray-500 line-through text-sm">{{ product.compare_price }} FCFA</span>
+                                    <span class="text-primary font-bold ml-2">{{ product.price }} FCFA</span>
+                                {% else %}
+                                    <span class="text-primary font-bold">{{ product.price }} FCFA</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex text-yellow-400">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star text-xs"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <a href="{% url 'product_detail' product.slug %}" class="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded text-center hover:bg-gray-200 transition-colors">
+                                Voir
+                            </a>
+                            <button class="flex-1 bg-primary text-white py-2 px-4 rounded hover:bg-secondary transition-colors"
+                                    onclick="addToCart({{ product.id }}, 'product')">
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Services -->
+            {% for service in wishlist_items.services %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="relative">
+                        {% if service.image %}
+                            <img src="{{ service.image.url }}" alt="{{ service.name }}" class="w-full h-64 object-cover">
+                        {% else %}
+                            <img src="https://picsum.photos/seed/{{ service.id }}/400/300.jpg" alt="{{ service.name }}" class="w-full h-64 object-cover">
+                        {% endif %}
+                        
+                        <button class="absolute bottom-2 right-2 bg-white text-red-500 p-2 rounded-full shadow-md hover:bg-red-500 hover:text-white transition-colors"
+                                onclick="toggleWishlist({{ service.id }}, 'service')">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-2">{{ service.name }}</h3>
+                        <p class="text-gray-600 text-sm mb-3">{{ service.short_description|truncatechars:80 }}</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-primary font-bold">{{ service.price }} FCFA</span>
+                            <span class="text-gray-500 text-sm">{{ service.duration }} min</span>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <a href="{% url 'service_detail' service.slug %}" class="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded text-center hover:bg-gray-200 transition-colors">
+                                Détails
+                            </a>
+                            <a href="{% url 'booking_create' service.id %}" class="flex-1 bg-primary text-white py-2 px-4 rounded text-center hover:bg-secondary transition-colors">
+                                Réserver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-8 flex justify-between">
+            <a href="{% url 'product_list' %}" class="text-primary hover:text-secondary transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Continuer vos achats
+            </a>
+            <button id="clear-wishlist" class="text-red-500 hover:text-red-700 transition-colors">
+                Vider la liste de souhaits
+            </button>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow-md p-8 text-center">
+            <div class="mb-6">
+                <i class="fas fa-heart text-6xl text-gray-300"></i>
+            </div>
+            <h2 class="text-2xl font-semibold mb-4">Votre liste de souhaits est vide</h2>
+            <p class="text-gray-600 mb-6">Commencez à ajouter des produits et services que vous aimez à votre liste de souhaits.</p>
+            <a href="{% url 'product_list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                Découvrir nos produits
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add to Cart Function
+    function addToCart(id, type) {
+        fetch('{% url "add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'product_id': type === 'product' ? id : null,
+                'service_id': type === 'service' ? id : null,
+                'quantity': 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count
+                document.querySelectorAll('.fa-shopping-cart').forEach(el => {
+                    const badge = el.nextElementSibling;
+                    if (badge) {
+                        badge.textContent = data.cart_items_count;
+                    }
+                });
+                
+                // Show success message
+                alert(data.message);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+    }
+    
+    // Toggle Wishlist Function
+    function toggleWishlist(id, type) {
+        fetch('{% url "toggle_wishlist" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'product_id': type === 'product' ? id : null,
+                'service_id': type === 'service' ? id : null
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the item from the DOM
+                const item = document.querySelector(`button[onclick="toggleWishlist(${id}, '${type}')"]`).closest('.bg-white');
+                item.remove();
+                
+                // Update wishlist count
+                document.querySelectorAll('.fa-heart').forEach(el => {
+                    const badge = el.nextElementSibling;
+                    if (badge) {
+                        const currentCount = parseInt(badge.textContent);
+                        badge.textContent = data.added ? currentCount + 1 : currentCount - 1;
+                    }
+                });
+                
+                // Check if wishlist is empty
+                if (!data.added) {
+                    const remainingItems = document.querySelectorAll('.bg-white').length;
+                    if (remainingItems === 0) {
+                        location.reload();
+                    }
+                }
+                
+                // Show success message
+                alert(data.message);
+            } else {
+                if (data.login_required) {
+                    window.location.href = '{% url "login" %}';
+                } else {
+                    alert(data.message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+    }
+    
+    // Clear Wishlist
+    document.getElementById('clear-wishlist').addEventListener('click', function() {
+        if (confirm('Êtes-vous sûr de vouloir vider votre liste de souhaits?')) {
+            {% for product in wishlist_items.products %}
+                fetch('{% url "toggle_wishlist" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        'product_id': {{ product.id }},
+                        'service_id': null
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Check if all items are removed
+                        {% if forloop.last %}
+                            location.reload();
+                        {% endif %}
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            {% endfor %}
+            
+            {% for service in wishlist_items.services %}
+                fetch('{% url "toggle_wishlist" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        'product_id': null,
+                        'service_id': {{ service.id }}
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Check if all items are removed
+                        {% if forloop.last %}
+                            location.reload();
+                        {% endif %}
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            {% endfor %}
+        }
+    });
+</script>
+{% endblock %}

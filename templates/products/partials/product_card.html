@@ -1,0 +1,55 @@
+<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+    <div class="relative">
+        {% if product.images.all %}
+            {% with product.images.all|first as image %}
+                <img src="{{ image.image.url }}" alt="{{ product.name }}" class="w-full h-64 object-cover">
+            {% endwith %}
+        {% else %}
+            <img src="https://picsum.photos/seed/{{ product.id }}/400/300.jpg" alt="{{ product.name }}" class="w-full h-64 object-cover">
+        {% endif %}
+        
+        {% if product.is_new %}
+            <span class="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 text-xs rounded">Nouveau</span>
+        {% endif %}
+        
+        {% if product.get_discount_percentage > 0 %}
+            <span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded">-{{ product.get_discount_percentage }}%</span>
+        {% endif %}
+        
+        <button class="absolute bottom-2 right-2 bg-white text-primary p-2 rounded-full shadow-md hover:bg-primary hover:text-white transition-colors"
+                onclick="toggleWishlist({{ product.id }}, 'product')">
+            <i class="fas fa-heart"></i>
+        </button>
+    </div>
+    
+    <div class="p-4">
+        <h3 class="font-semibold text-lg mb-2">{{ product.name }}</h3>
+        <p class="text-gray-600 text-sm mb-3">{{ product.short_description|truncatechars:80 }}</p>
+        
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                {% if product.compare_price %}
+                    <span class="text-gray-500 line-through text-sm">{{ product.compare_price }} FCFA</span>
+                    <span class="text-primary font-bold ml-2">{{ product.price }} FCFA</span>
+                {% else %}
+                    <span class="text-primary font-bold">{{ product.price }} FCFA</span>
+                {% endif %}
+            </div>
+            <div class="flex text-yellow-400">
+                {% for i in "12345" %}
+                    <i class="fas fa-star text-xs"></i>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="flex gap-2">
+            <a href="{% url 'product_detail' product.slug %}" class="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded text-center hover:bg-gray-200 transition-colors">
+                Voir
+            </a>
+            <button class="flex-1 bg-primary text-white py-2 px-4 rounded hover:bg-secondary transition-colors"
+                    onclick="addToCart({{ product.id }}, 'product')">
+                Ajouter
+            </button>
+        </div>
+    </div>
+</div>

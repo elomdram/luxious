@@ -1,0 +1,52 @@
+<div class="bg-white rounded-lg shadow-md p-6 mb-4">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h3 class="font-semibold text-lg">{{ address.first_name }} {{ address.last_name }}</h3>
+            {% if address.company %}
+                <p class="text-gray-600">{{ address.company }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="flex space-x-2">
+            {% if address.is_default_shipping %}
+                <span class="text-xs bg-primary text-white px-2 py-1 rounded">Livraison</span>
+            {% endif %}
+            {% if address.is_default_billing %}
+                <span class="text-xs bg-secondary text-white px-2 py-1 rounded">Facturation</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="text-gray-600 mb-4">
+        {{ address.street }}{% if address.complement %}, {{ address.complement }}{% endif %}<br>
+        {{ address.postal_code }} {{ address.city }}, {{ address.country }}<br>
+        {{ address.phone }}
+    </div>
+    
+    <div class="flex justify-between">
+        <div class="space-x-2">
+            <a href="{% url 'address_update' address.id %}" class="text-primary hover:text-secondary transition-colors">
+                <i class="fas fa-edit mr-1"></i>Modifier
+            </a>
+            <button class="text-red-500 hover:text-red-700 transition-colors"
+                    onclick="deleteAddress({{ address.id }})">
+                <i class="fas fa-trash mr-1"></i>Supprimer
+            </button>
+        </div>
+        
+        <div class="space-x-2">
+            {% if not address.is_default_shipping %}
+                <button class="text-primary hover:text-secondary transition-colors"
+                        onclick="setDefaultAddress({{ address.id }}, 'shipping')">
+                    <i class="fas fa-truck mr-1"></i>Livraison par défaut
+                </button>
+            {% endif %}
+            {% if not address.is_default_billing %}
+                <button class="text-primary hover:text-secondary transition-colors"
+                        onclick="setDefaultAddress({{ address.id }}, 'billing')">
+                    <i class="fas fa-file-invoice mr-1"></i>Facturation par défaut
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>

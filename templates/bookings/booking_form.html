@@ -1,0 +1,1106 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}
+        Modifier la réservation - {{ object.service.name }}
+    {% else %}
+        Réserver - {{ service.name }}
+    {% endif %}
+    - Luxious Beautyland
+{% endblock %}
+
+{% block meta_description %}
+    {% if object %}
+        Modifiez votre réservation pour {{ object.service.name }} chez Luxious Beautyland
+    {% else %}
+        Réservez votre rendez-vous pour {{ service.name }} chez Luxious Beautyland
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-gray-600">
+            <li><a href="{% url 'home' %}" class="hover:text-primary">Accueil</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li><a href="{% url 'service_list' %}" class="hover:text-primary">Services</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            {% if service %}
+                <li><a href="{% url 'service_detail' service.slug %}" class="hover:text-primary">{{ service.name }}</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+            {% endif %}
+            <li class="text-gray-800">
+                {% if object %}Modifier la réservation{% else %}Nouvelle réservation{% endif %}
+            </li>
+        </ol>
+    </nav>
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">
+                {% if object %}
+                    Modifier votre réservation
+                {% else %}
+                    Réserver votre rendez-vous
+                {% endif %}
+            </h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                {% if object %}
+                    Modifiez les détails de votre réservation pour {{ object.service.name }}
+                {% else %}
+                    Choisissez la date et l'heure qui vous conviennent le mieux pour votre rendez-vous
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Service Summary Card -->
+        <div class="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-6 mb-8">
+            <div class="flex items-center gap-4">
+                {% if service.image %}
+                    <img src="{{ service.image.url }}" alt="{{ service.name }}" 
+                         class="w-20 h-20 object-cover rounded-lg">
+                {% else %}
+                    <img src="https://picsum.photos/seed/{{ service.id }}/100/100.jpg" alt="{{ service.name }}" 
+                         class="w-20 h-20 object-cover rounded-lg">
+                {% endif %}
+                <div class="flex-grow">
+                    <h2 class="text-xl font-bold mb-2">
+                        {% if object %}{{ object.service.name }}{% else %}{{ service.name }}{% endif %}
+                    </h2>
+                    <div class="flex flex-wrap gap-4 text-sm opacity-90">
+                        <div class="flex items-center">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span>
+                                {% if object %}{{ object.service.duration }}{% else %}{{ service.duration }}{% endif %} minutes
+                            </span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-users mr-2"></i>
+                            <span>
+                                Max {% if object %}{{ object.service.max_participants }}{% else %}{{ service.max_participants }}{% endif %} participants
+                            </span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>
+                                {% if object %}{{ object.service.price }}{% else %}{{ service.price }}{% endif %} FCFA/personne
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% if object %}
+                    <div class="text-right">
+                        <div class="text-sm opacity-75">Statut actuel</div>
+                        <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+                            {% if object.status == 'confirmed' %}bg-green-400 text-gray-800
+                            {% elif object.status == 'pending' %}bg-yellow-400 text-gray-800
+                            {% elif object.status == 'cancelled' %}bg-red-400 text-white
+                            {% else %}bg-blue-400 text-white
+                            {% endif %}">
+                            {% if object.status == 'confirmed' %}Confirmée
+                            {% elif object.status == 'pending' %}En attente
+                            {% elif object.status == 'cancelled' %}Annulée
+                            {% elif object.status == 'completed' %}Terminée
+                            {% else %}No Show
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Booking Form -->
+            <div class="lg:col-span-2">
+                <form method="post" id="booking-form" class="bg-white rounded-lg shadow-md p-6">
+                    {% csrf_token %}
+                    
+                    <!-- Display form errors -->
+                    {% if form.non_field_errors %}
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Step Indicator -->
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div id="step-1" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                                    1
+                                </div>
+                                <span class="ml-2 text-sm font-medium">Date</span>
+                            </div>
+                            <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
+                            <div class="flex items-center">
+                                <div id="step-2" class="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                                    2
+                                </div>
+                                <span class="ml-2 text-sm font-medium text-gray-600">Heure</span>
+                            </div>
+                            <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
+                            <div class="flex items-center">
+                                <div id="step-3" class="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                                    3
+                                </div>
+                                <span class="ml-2 text-sm font-medium text-gray-600">Détails</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Date Selection -->
+                    <div id="step-1-content" class="step-content">
+                        <h3 class="text-xl font-semibold mb-4">Étape 1: Choisissez une date</h3>
+                        
+                        <!-- Calendar Navigation -->
+                        <div class="flex items-center justify-between mb-4">
+                            <button type="button" id="prev-month" 
+                                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <h4 id="current-month" class="text-lg font-semibold"></h4>
+                            <button type="button" id="next-month" 
+                                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Day headers -->
+                        <div class="grid grid-cols-7 gap-1 mb-2">
+                            <div class="text-center text-xs font-semibold text-gray-600 py-2">Dim</div>
+                            <div class="text-center text-xs font-semibold text-gray-600 py-2">Lun</div>
+                            <div class="text-center text-xs font-semibold text-gray-600 py-2">Mar</div>
+                            <div class="text-center text-xs font-semibold text-gray-600 py-2">Mer</div>
+                            <div class="text-center text-xs font-semibold text-gray-600 py-2">Jeu</div>
+                            <div class="text-center text-xs font-semibold text-gray-600 py-2">Ven</div>
+                            <div class="text-center text-xs font-semibold text-gray-600 py-2">Sam</div>
+                        </div>
+                        
+                        <!-- Calendar Grid -->
+                        <div id="calendar-days" class="grid grid-cols-7 gap-1 mb-4"></div>
+                        
+                        <input type="hidden" id="selected-date" name="date" 
+                               {% if form.date.value %}value="{{ form.date.value }}"{% endif %} required>
+                        
+                        <!-- Selected Date Display -->
+                        <div id="selected-date-display" class="hidden bg-primary bg-opacity-10 border border-primary rounded-lg p-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-check text-primary mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-600">Date sélectionnée</div>
+                                    <div id="selected-date-text" class="font-semibold"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if form.date.errors %}
+                            <div class="text-red-500 text-sm mt-2">
+                                {% for error in form.date.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Step 2: Time Selection -->
+                    <div id="step-2-content" class="step-content hidden">
+                        <h3 class="text-xl font-semibold mb-4">Étape 2: Choisissez une heure</h3>
+                        
+                        <div class="mb-4">
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span>Créneaux disponibles pour le <span id="time-selection-date" class="font-semibold"></span></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Time Slots Grid -->
+                        <div id="time-slots" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                            <!-- Time slots will be loaded here -->
+                        </div>
+                        
+                        <input type="hidden" id="selected-time" name="start_time" 
+                               {% if form.start_time.value %}value="{{ form.start_time.value }}"{% endif %} required>
+                        
+                        <!-- Selected Time Display -->
+                        <div id="selected-time-display" class="hidden bg-primary bg-opacity-10 border border-primary rounded-lg p-4 mt-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-clock text-primary mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-600">Heure sélectionnée</div>
+                                    <div id="selected-time-text" class="font-semibold"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if form.start_time.errors %}
+                            <div class="text-red-500 text-sm mt-2">
+                                {% for error in form.start_time.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Step 3: Details -->
+                    <div id="step-3-content" class="step-content hidden">
+                        <h3 class="text-xl font-semibold mb-4">Étape 3: Détails de la réservation</h3>
+                        
+                        <div class="space-y-6">
+                            <!-- Participants -->
+                            <div>
+                                <label for="{{ form.participants.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nombre de participants
+                                </label>
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" id="decrease-participants" 
+                                            class="w-10 h-10 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="{{ form.participants.id_for_label }}" name="participants" 
+                                           value="{{ form.participants.value|default:1 }}" 
+                                           min="1" max="{% if object %}{{ object.service.max_participants }}{% else %}{{ service.max_participants }}{% endif %}" 
+                                           class="w-20 text-center border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                    <button type="button" id="increase-participants" 
+                                            class="w-10 h-10 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                {% if form.participants.errors %}
+                                    <div class="text-red-500 text-sm mt-1">
+                                        {% for error in form.participants.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div>
+                                <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Notes (optionnel)
+                                </label>
+                                <textarea id="{{ form.notes.id_for_label }}" name="notes" rows="4" 
+                                          placeholder="Informations supplémentaires pour votre réservation..."
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">{{ form.notes.value|default:'' }}</textarea>
+                                {% if form.notes.errors %}
+                                    <div class="text-red-500 text-sm mt-1">
+                                        {% for error in form.notes.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Booking Summary -->
+                            <div class="bg-gray-50 rounded-lg p-6">
+                                <h4 class="font-semibold mb-4">Récapitulatif de la réservation</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Service:</span>
+                                        <span class="font-medium">{% if object %}{{ object.service.name }}{% else %}{{ service.name }}{% endif %}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Date:</span>
+                                        <span id="summary-date" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Heure:</span>
+                                        <span id="summary-time" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Durée:</span>
+                                        <span class="font-medium">{% if object %}{{ object.service.duration }}{% else %}{{ service.duration }}{% endif %} minutes</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Participants:</span>
+                                        <span id="summary-participants" class="font-medium">1</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Prix par personne:</span>
+                                        <span class="font-medium">{% if object %}{{ object.service.price }}{% else %}{{ service.price }}{% endif %} FCFA</span>
+                                    </div>
+                                    <div class="border-t pt-2 mt-2">
+                                        <div class="flex justify-between font-semibold text-lg">
+                                            <span>Total:</span>
+                                            <span id="summary-total">{% if object %}{{ object.service.price }}{% else %}{{ service.price }}{% endif %} FCFA</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Terms and Conditions -->
+                            <div>
+                                <label class="flex items-start">
+                                    <input type="checkbox" id="terms-accepted" name="terms_accepted" 
+                                           class="mt-1 mr-3" required>
+                                    <span class="text-sm text-gray-600">
+                                        J'accepte les <a href="{% url 'page_detail' slug='booking-terms' %}" 
+                                                        class="text-primary hover:text-secondary transition-colors">conditions de réservation</a> 
+                                        et comprends que les annulations doivent être faites au moins 24 heures à l'avance.
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between mt-8">
+                        <button type="button" id="prev-step" 
+                                class="hidden px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>Précédent
+                        </button>
+                        <div></div>
+                        <button type="button" id="next-step" 
+                                class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors">
+                            Suivant<i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <button type="submit" id="submit-booking" 
+                                class="hidden px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors">
+                            {% if object %}
+                                Mettre à jour la réservation
+                            {% else %}
+                                Procéder au paiement
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Important Information -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">Informations importantes</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <i class="fas fa-clock text-primary mt-1 mr-3"></i>
+                            <div>
+                                <div class="font-medium text-sm">Politique d'annulation</div>
+                                <div class="text-xs text-gray-600">
+                                    Annulation gratuite jusqu'à 24h avant le rendez-vous
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-user-clock text-primary mt-1 mr-3"></i>
+                            <div>
+                                <div class="font-medium text-sm">Retard</div>
+                                <div class="text-xs text-gray-600">
+                                    Un retard de plus de 15 minutes peut entraîner l'annulation du rendez-vous
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-phone text-primary mt-1 mr-3"></i>
+                            <div>
+                                <div class="font-medium text-sm">Contact</div>
+                                <div class="text-xs text-gray-600">
+                                    Appelez-nous au +228 90 71 29 28 pour toute question
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Services -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Autres services disponibles</h3>
+                    <div class="space-y-4">
+                        {% for other_service in available_services %}
+                            <div class="flex items-center gap-3">
+                                {% if other_service.image %}
+                                    <img src="{{ other_service.image.url }}" alt="{{ other_service.name }}" 
+                                         class="w-12 h-12 object-cover rounded">
+                                {% else %}
+                                    <img src="https://picsum.photos/seed/{{ other_service.id }}/100/100.jpg" 
+                                         alt="{{ other_service.name }}" class="w-12 h-12 object-cover rounded">
+                                {% endif %}
+                                <div class="flex-grow">
+                                    <h4 class="font-medium text-sm">{{ other_service.name }}</h4>
+                                    <div class="text-xs text-gray-600">
+                                        {{ other_service.duration }} min • {{ other_service.price }} FCFA
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-sm text-gray-500">Aucun autre service disponible</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-8 text-center">
+        <div class="mb-4">
+            <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
+        </div>
+        <p class="text-gray-600">Traitement de votre réservation...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Global variables sécurisées
+    let currentStep = 1;
+    let currentMonth = new Date();
+    let selectedDate = null;
+    let selectedTime = null;
+    let participants = 1;
+
+    // Variables sécurisées avec parsing des nombres
+    const servicePrice = parseInt("{{ object.service.price|default:service.price|default:'0' }}".replace(/\s/g, '')) || 0;
+    const serviceDuration = parseInt("{{ object.service.duration|default:service.duration|default:'0' }}") || 0;
+    const serviceId = parseInt("{{ object.service.id|default:service.id|default:'0' }}") || 0;
+    const maxParticipants = parseInt("{{ object.service.max_participants|default:service.max_participants|default:'1' }}") || 1;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCalendar();
+        updateStepIndicator();
+        updateParticipantsSummary();
+        
+        // Pre-fill data if editing
+        {% if object %}
+            selectedDate = new Date('{{ object.date|date:"Y-m-d" }}');
+            selectedTime = '{{ object.start_time|time:"H:i" }}';
+            participants = {{ object.participants }};
+            
+            document.getElementById('{{ form.participants.id_for_label }}').value = participants;
+            updateSelectedDateDisplay();
+            updateSelectedTimeDisplay();
+            loadTimeSlots(selectedDate.toISOString().split('T')[0]);
+            
+            // Jump to step 3
+            currentStep = 3;
+            showStep(3);
+        {% endif %}
+    });
+
+    // Calendar Functions
+    function initializeCalendar() {
+        renderCalendar();
+        
+        document.getElementById('prev-month').addEventListener('click', () => {
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            renderCalendar();
+        });
+        
+        document.getElementById('next-month').addEventListener('click', () => {
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            renderCalendar();
+        });
+    }
+
+    function renderCalendar() {
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+        
+        // Calculer les informations du mois
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay(); // 0 = Dimanche, 1 = Lundi, etc.
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Mettre à jour l'affichage du mois
+        const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                        'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+        document.getElementById('current-month').textContent = `${monthNames[month]} ${year}`;
+        
+        // Effacer les jours précédents
+        const calendarDays = document.getElementById('calendar-days');
+        calendarDays.innerHTML = '';
+        
+        // Ajouter des cellules vides pour avant le premier jour
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.classList.add('aspect-square', 'bg-transparent');
+            calendarDays.appendChild(emptyCell);
+        }
+        
+        // Ajouter les jours du mois
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateString = date.toISOString().split('T')[0];
+            const isPast = date < today;
+            const dayOfWeek = date.getDay(); // 0 = dimanche, 1 = lundi, ...
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const isToday = date.toDateString() === today.toDateString();
+            
+            const dayCell = document.createElement('div');
+            
+            // Classes CSS de base
+            let baseClasses = 'aspect-square flex items-center justify-center rounded-lg transition-all duration-200';
+            
+            // Ajouter des classes conditionnelles
+            if (isToday) {
+                baseClasses += ' border-2 border-primary font-bold';
+            } else {
+                baseClasses += ' border border-transparent';
+            }
+            
+            if (isPast) {
+                baseClasses += ' text-gray-400 bg-gray-50 cursor-not-allowed';
+            } else if (isWeekend) {
+                baseClasses += ' text-gray-600 hover:bg-gray-100 cursor-pointer';
+            } else {
+                baseClasses += ' text-gray-800 hover:bg-primary hover:text-white cursor-pointer';
+            }
+            
+            dayCell.className = baseClasses;
+            dayCell.textContent = day;
+            dayCell.dataset.date = dateString;
+            
+            // Ajouter un titre pour l'accessibilité
+            dayCell.title = date.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Ajouter l'événement click seulement si la date n'est pas passée
+            if (!isPast) {
+                dayCell.addEventListener('click', () => selectDate(dateString));
+                
+                // Animation au survol
+                dayCell.addEventListener('mouseenter', () => {
+                    if (!(selectedDate && date.toDateString() === selectedDate.toDateString())) {
+                        dayCell.classList.add('scale-105', 'shadow-md');
+                    }
+                });
+                
+                dayCell.addEventListener('mouseleave', () => {
+                    dayCell.classList.remove('scale-105', 'shadow-md');
+                });
+            } else {
+                dayCell.classList.add('cursor-not-allowed');
+            }
+            
+            // Mettre en surbrillance la date sélectionnée
+            if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
+                dayCell.classList.remove(
+                    'hover:bg-primary', 
+                    'hover:text-white', 
+                    'hover:bg-gray-100',
+                    'text-gray-400',
+                    'text-gray-600', 
+                    'text-gray-800'
+                );
+                dayCell.classList.add('bg-primary', 'text-white', 'shadow-lg', 'scale-105');
+            }
+            
+            calendarDays.appendChild(dayCell);
+        }
+    }
+
+    function selectDate(dateString) {
+        selectedDate = new Date(dateString);
+        document.getElementById('selected-date').value = dateString;
+        updateSelectedDateDisplay();
+        loadTimeSlots(dateString);
+        
+        // Passer à l'étape suivante si ce n'est pas déjà fait
+        if (currentStep === 1) {
+            setTimeout(() => {
+                currentStep = 2;
+                showStep(currentStep);
+            }, 300);
+        }
+        
+        // Re-render calendar to update selection avec une animation
+        const calendarDays = document.getElementById('calendar-days');
+        calendarDays.style.opacity = '0.7';
+        calendarDays.style.transition = 'opacity 0.3s';
+        
+        setTimeout(() => {
+            renderCalendar();
+            calendarDays.style.opacity = '1';
+        }, 200);
+    }
+
+    function updateSelectedDateDisplay() {
+        const display = document.getElementById('selected-date-display');
+        const text = document.getElementById('selected-date-text');
+        
+        if (selectedDate) {
+            display.classList.remove('hidden');
+            text.textContent = selectedDate.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Animation d'apparition
+            display.style.opacity = '0';
+            display.style.transform = 'translateY(-10px)';
+            display.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                display.style.opacity = '1';
+                display.style.transform = 'translateY(0)';
+            }, 10);
+        } else {
+            display.classList.add('hidden');
+        }
+    }
+
+    // Time Slots Functions
+    function loadTimeSlots(date) {
+        const container = document.getElementById('time-slots');
+        const loadingHTML = `
+            <div class="col-span-full text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-gray-600">Chargement des créneaux disponibles...</p>
+            </div>`;
+        container.innerHTML = loadingHTML;
+        
+        fetch(`/api/services/${serviceId}/available-dates/`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                container.innerHTML = '';
+                
+                const startTime = 8 * 60; // 8:00 AM en minutes
+                const endTime = 18 * 60; // 6:00 PM en minutes
+                
+                let availableSlots = 0;
+                
+                for (let time = startTime; time <= endTime - serviceDuration; time += 30) {
+                    const hours = Math.floor(time / 60);
+                    const minutes = time % 60;
+                    const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                    
+                    // Calculer l'heure de fin
+                    const endMinutes = time + serviceDuration;
+                    const endHours = Math.floor(endMinutes / 60);
+                    const endMins = endMinutes % 60;
+                    const endTimeString = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+                    
+                    // Vérifier si le créneau est disponible
+                    const isAvailable = !data.booked_slots[date] || 
+                                       !data.booked_slots[date].some(slot => 
+                                           (time >= parseInt(slot.start.split(':')[0]) * 60 + parseInt(slot.start.split(':')[1]) && 
+                                            time < parseInt(slot.end.split(':')[0]) * 60 + parseInt(slot.end.split(':')[1]))
+                                       );
+                    
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = `p-3 text-center border rounded-lg transition-all duration-200 ${
+                        isAvailable ? 
+                        'hover:bg-primary hover:text-white hover:border-primary hover:shadow-md hover:scale-105 cursor-pointer border-gray-200' : 
+                        'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-100'
+                    }`;
+                    slotDiv.innerHTML = `
+                        <div class="font-medium">${timeString}</div>
+                        <div class="text-xs opacity-75">${endTimeString}</div>
+                    `;
+                    slotDiv.dataset.time = timeString;
+                    
+                    if (isAvailable) {
+                        availableSlots++;
+                        slotDiv.addEventListener('click', () => selectTime(timeString));
+                        
+                        slotDiv.addEventListener('mouseenter', () => {
+                            if (selectedTime !== timeString) {
+                                slotDiv.classList.add('shadow-md', 'scale-105');
+                            }
+                        });
+                        
+                        slotDiv.addEventListener('mouseleave', () => {
+                            if (selectedTime !== timeString) {
+                                slotDiv.classList.remove('shadow-md', 'scale-105');
+                            }
+                        });
+                    }
+                    
+                    // Mettre en surbrillance le créneau sélectionné
+                    if (selectedTime === timeString) {
+                        slotDiv.classList.remove('hover:bg-primary', 'hover:text-white', 'border-gray-200');
+                        slotDiv.classList.add('bg-primary', 'text-white', 'border-primary', 'shadow-lg', 'scale-105');
+                    }
+                    
+                    container.appendChild(slotDiv);
+                }
+                
+                // Message si aucun créneau disponible
+                if (availableSlots === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-600">Aucun créneau disponible pour cette date</p>
+                            <p class="text-sm text-gray-500 mt-2">Veuillez sélectionner une autre date</p>
+                        </div>`;
+                }
+            } else {
+                container.innerHTML = '<div class="col-span-full text-center text-red-500">Erreur lors du chargement des créneaux</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading time slots:', error);
+            container.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-3"></i>
+                    <p class="text-red-500">Erreur lors du chargement des créneaux</p>
+                    <p class="text-sm text-gray-500 mt-2">Veuillez réessayer</p>
+                </div>`;
+        });
+    }
+
+    function selectTime(timeString) {
+        selectedTime = timeString;
+        document.getElementById('selected-time').value = timeString;
+        updateSelectedTimeDisplay();
+        
+        // Passer à l'étape suivante si ce n'est pas déjà fait
+        if (currentStep === 2) {
+            setTimeout(() => {
+                currentStep = 3;
+                showStep(currentStep);
+            }, 300);
+        }
+        
+        // Re-render time slots to update selection avec animation
+        const date = selectedDate.toISOString().split('T')[0];
+        const container = document.getElementById('time-slots');
+        container.style.opacity = '0.7';
+        container.style.transition = 'opacity 0.3s';
+        
+        setTimeout(() => {
+            loadTimeSlots(date);
+            container.style.opacity = '1';
+        }, 200);
+    }
+
+    function updateSelectedTimeDisplay() {
+        const display = document.getElementById('selected-time-display');
+        const text = document.getElementById('selected-time-text');
+        
+        if (selectedTime) {
+            display.classList.remove('hidden');
+            text.textContent = selectedTime;
+            
+            // Animation d'apparition
+            display.style.opacity = '0';
+            display.style.transform = 'translateY(-10px)';
+            display.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                display.style.opacity = '1';
+                display.style.transform = 'translateY(0)';
+            }, 10);
+        } else {
+            display.classList.add('hidden');
+        }
+    }
+
+    // Step Navigation
+    function showStep(step) {
+        // Cacher toutes les étapes
+        document.querySelectorAll('.step-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Afficher l'étape courante avec animation
+        const currentStepContent = document.getElementById(`step-${step}-content`);
+        currentStepContent.classList.remove('hidden');
+        currentStepContent.style.opacity = '0';
+        currentStepContent.style.transform = 'translateX(20px)';
+        currentStepContent.style.transition = 'all 0.4s ease';
+        
+        setTimeout(() => {
+            currentStepContent.style.opacity = '1';
+            currentStepContent.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Mettre à jour les boutons de navigation
+        const prevBtn = document.getElementById('prev-step');
+        const nextBtn = document.getElementById('next-step');
+        const submitBtn = document.getElementById('submit-booking');
+        
+        if (step === 1) {
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+            submitBtn.classList.add('hidden');
+        } else if (step === 3) {
+            prevBtn.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            updateSummary();
+        } else {
+            prevBtn.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+            submitBtn.classList.add('hidden');
+        }
+        
+        updateStepIndicator();
+    }
+
+    function updateStepIndicator() {
+        for (let i = 1; i <= 3; i++) {
+            const stepCircle = document.getElementById(`step-${i}`);
+            const stepText = stepCircle.nextElementSibling;
+            
+            if (i < currentStep) {
+                stepCircle.className = 'w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300';
+                stepCircle.innerHTML = '<i class="fas fa-check text-sm"></i>';
+                stepText.classList.remove('text-gray-600');
+                stepText.classList.add('text-green-600', 'font-medium');
+            } else if (i === currentStep) {
+                stepCircle.className = 'w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold shadow-lg transition-all duration-300';
+                stepCircle.textContent = i;
+                stepText.classList.remove('text-gray-600');
+                stepText.classList.add('text-primary', 'font-bold');
+            } else {
+                stepCircle.className = 'w-10 h-10 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300';
+                stepCircle.textContent = i;
+                stepText.classList.add('text-gray-500');
+                stepText.classList.remove('text-primary', 'text-green-600', 'font-bold', 'font-medium');
+            }
+        }
+    }
+
+    // Event Listeners
+    document.getElementById('next-step').addEventListener('click', () => {
+        if (validateCurrentStep()) {
+            if (currentStep < 3) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+    });
+
+    document.getElementById('prev-step').addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+
+    // Participants Controls
+    document.getElementById('increase-participants').addEventListener('click', () => {
+        const input = document.getElementById('{{ form.participants.id_for_label }}');
+        if (participants < maxParticipants) {
+            participants++;
+            input.value = participants;
+            updateParticipantsSummary();
+            
+            // Animation du bouton
+            const btn = document.getElementById('increase-participants');
+            btn.classList.add('scale-95');
+            setTimeout(() => btn.classList.remove('scale-95'), 200);
+        }
+    });
+
+    document.getElementById('decrease-participants').addEventListener('click', () => {
+        const input = document.getElementById('{{ form.participants.id_for_label }}');
+        if (participants > 1) {
+            participants--;
+            input.value = participants;
+            updateParticipantsSummary();
+            
+            // Animation du bouton
+            const btn = document.getElementById('decrease-participants');
+            btn.classList.add('scale-95');
+            setTimeout(() => btn.classList.remove('scale-95'), 200);
+        }
+    });
+
+    document.getElementById('{{ form.participants.id_for_label }}').addEventListener('input', (e) => {
+        participants = Math.max(1, Math.min(maxParticipants, parseInt(e.target.value) || 1));
+        e.target.value = participants;
+        updateParticipantsSummary();
+    });
+
+    // Validation
+    function validateCurrentStep() {
+        if (currentStep === 1) {
+            if (!selectedDate) {
+                showNotification('Veuillez sélectionner une date', 'error');
+                // Pulse animation on calendar
+                const calendar = document.getElementById('step-1-content');
+                calendar.classList.add('animate-pulse');
+                setTimeout(() => calendar.classList.remove('animate-pulse'), 1000);
+                return false;
+            }
+        } else if (currentStep === 2) {
+            if (!selectedTime) {
+                showNotification('Veuillez sélectionner une heure', 'error');
+                // Pulse animation on time slots
+                const timeSlots = document.getElementById('step-2-content');
+                timeSlots.classList.add('animate-pulse');
+                setTimeout(() => timeSlots.classList.remove('animate-pulse'), 1000);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Update Functions
+    function updateParticipantsSummary() {
+        document.getElementById('summary-participants').textContent = participants;
+        const total = servicePrice * participants;
+        document.getElementById('summary-total').textContent = total.toLocaleString('fr-FR') + ' FCFA';
+        
+        // Animation du total
+        const totalElement = document.getElementById('summary-total');
+        totalElement.classList.add('scale-110');
+        setTimeout(() => totalElement.classList.remove('scale-110'), 300);
+    }
+
+    function updateSummary() {
+        if (selectedDate) {
+            document.getElementById('summary-date').textContent = selectedDate.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        if (selectedTime) {
+            document.getElementById('summary-time').textContent = selectedTime;
+        }
+        if (selectedDate) {
+            document.getElementById('time-selection-date').textContent = selectedDate.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+            });
+        }
+    }
+
+    // Form Submission
+    document.getElementById('booking-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!document.getElementById('terms-accepted').checked) {
+            showNotification('Veuillez accepter les conditions de réservation', 'error');
+            const termsCheckbox = document.getElementById('terms-accepted');
+            termsCheckbox.classList.add('ring-2', 'ring-red-500');
+            setTimeout(() => termsCheckbox.classList.remove('ring-2', 'ring-red-500'), 2000);
+            return;
+        }
+        
+        // Afficher le chargement
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.classList.remove('hidden');
+        
+        try {
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            // Ajouter les champs cachés programmatiquement
+            if (selectedDate) {
+                formData.set('date', selectedDate.toISOString().split('T')[0]);
+            }
+            if (selectedTime) {
+                formData.set('start_time', selectedTime);
+            }
+            formData.set('participants', participants);
+            
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+            
+            loadingOverlay.classList.add('hidden');
+            
+            if (response.ok) {
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                if (response.redirected) {
+                    showNotification('Réservation confirmée avec succès!', 'success');
+                    setTimeout(() => {
+                        window.location.href = response.url;
+                    }, 1500);
+                } else {
+                    const errorDiv = doc.querySelector('.error');
+                    if (errorDiv) {
+                        showNotification('Veuillez corriger les erreurs dans le formulaire', 'error');
+                    } else {
+                        {% if object %}
+                            window.location.href = "{% url 'booking_detail' pk=object.pk %}";
+                        {% else %}
+                            window.location.href = "{% url 'booking_list' %}";
+                        {% endif %}
+                    }
+                }
+            } else {
+                showNotification('Une erreur est survenue. Veuillez réessayer.', 'error');
+            }
+        } catch (error) {
+            loadingOverlay.classList.add('hidden');
+            console.error('Error:', error);
+            showNotification('Une erreur est survenue. Veuillez réessayer.', 'error');
+        }
+    });
+
+    // Fonction de notification
+    function showNotification(message, type) {
+        // Supprimer les notifications existantes
+        document.querySelectorAll('.custom-notification').forEach(n => n.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `custom-notification fixed top-4 right-4 p-4 rounded-lg shadow-xl z-50 transform transition-all duration-300 ${
+            type === 'success' 
+                ? 'bg-green-100 border-l-4 border-green-500 text-green-800' 
+                : 'bg-red-100 border-l-4 border-red-500 text-red-800'
+        }`;
+        notification.style.maxWidth = '350px';
+        
+        notification.innerHTML = `
+            <div class="flex items-start">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-3 mt-0.5 ${type === 'success' ? 'text-green-500' : 'text-red-500'}"></i>
+                <div class="flex-grow">
+                    <p class="font-medium">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animation d'entrée
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100px)';
+        
+        setTimeout(() => {
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Suppression automatique après 5 secondes
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100px)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}

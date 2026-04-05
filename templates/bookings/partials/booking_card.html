@@ -1,0 +1,123 @@
+{% load static %}
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
+    <div class="relative overflow-hidden">
+        {% if booking.service.image %}
+            <img src="{{ booking.service.image.url }}" 
+                 alt="{{ booking.service.name }}" 
+                 class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+        {% else %}
+            <img src="{% static 'images/service-default.jpg' %}" 
+                 alt="{{ booking.service.name }}" 
+                 class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+        {% endif %}
+        
+        {% if user.is_authenticated %}
+        <button class="absolute bottom-2 right-2 bg-white text-gray-600 p-2 rounded-full shadow-md hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                onclick="toggleWishlist({{ booking.service.id }}, 'service')"
+                aria-label="Ajouter aux favoris"
+                data-service-id="{{ booking.service.id }}">
+            <i class="far fa-heart" aria-hidden="true"></i>
+        </button>
+        {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" 
+           class="absolute bottom-2 right-2 bg-white text-gray-600 p-2 rounded-full shadow-md hover:bg-primary hover:text-white transition-colors"
+           aria-label="Connectez-vous pour ajouter aux favoris">
+            <i class="far fa-heart" aria-hidden="true"></i>
+        </a>
+        {% endif %}
+        
+        {% if service.is_new %}
+        <span class="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+            Nouveau
+        </span>
+        {% endif %}
+    </div>
+    
+    <div class="p-4">
+        <h3 class="font-semibold text-lg mb-2 line-clamp-2">{{ booking.service.name }}</h3>
+        <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ booking.service.short_description|default:""|truncatechars:80 }}</p>
+        
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <span class="text-primary font-bold">{{ booking.service.price|floatformat:0 }} FCFA</span>
+                <span class="text-gray-500 text-xs block">par personne</span>
+            </div>
+            <span class="text-gray-500 text-sm flex items-center">
+                <i class="far fa-clock mr-1" aria-hidden="true"></i>
+                {{ booking.service.duration }} min
+            </span>
+        </div>
+        
+        {% if booking.service.average_rating %}
+        <div class="flex items-center gap-2 mb-3">
+            <div class="flex text-yellow-400 text-sm">
+                {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= service.average_rating %}
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                    {% else %}
+                        <i class="far fa-star" aria-hidden="true"></i>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <span class="text-xs text-gray-500">({{ service.reviews_count }} avis)</span>
+        </div>
+        {% endif %}
+        
+        <div class="flex gap-2">
+            <a href="{% url 'service_detail' booking.service.slug %}" 
+               class="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded text-center hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+               aria-label="Voir les détails de {{ service.name }}">
+                Détails
+            </a>
+            <a href="{% url 'booking_create' booking.service.id %}" 
+               class="flex-1 bg-primary text-white py-2 px-4 rounded text-center hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+               aria-label="Réserver {{ service.name }}">
+                Réserver
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+<script>
+    // Wishlist function for service cards
+    function toggleWishlist(serviceId, itemType) {
+        const button = event.currentTarget;
+        const icon = button.querySelector('i');
+        
+        fetch('{% url "toggle_wishlist" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'product_id': null,
+                'service_id': serviceId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.added) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas', 'text-primary');
+                } else {
+                    icon.classList.remove('fas', 'text-primary');
+                    icon.classList.add('far');
+                }
+            } else if (data.login_required) {
+                window.location.href = '{% url "login" %}?next={{ request.path }}';
+            } else {
+                alert(data.message || 'Une erreur est survenue.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+    }
+</script>
+{% endif %}

@@ -1,0 +1,53 @@
+<div class="space-y-6">
+    {% for review in reviews %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center">
+                    <img src="https://picsum.photos/seed/{{ review.user.id }}/50/50.jpg" alt="{{ review.user.get_full_name|default:review.user.username }}" 
+                         class="w-12 h-12 rounded-full mr-3">
+                    <div>
+                        <h4 class="font-semibold">{{ review.user.get_full_name|default:review.user.username }}</h4>
+                        <div class="flex text-yellow-400">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i class="fas fa-star text-sm"></i>
+                                {% else %}
+                                    <i class="far fa-star text-sm"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500">
+                    {{ review.created_at|date:"d F Y" }}
+                </div>
+            </div>
+            
+            {% if review.title %}
+                <h5 class="font-semibold mb-2">{{ review.title }}</h5>
+            {% endif %}
+            
+            <p class="text-gray-600">{{ review.comment }}</p>
+            
+            <div class="mt-4 flex items-center justify-between">
+                <button class="text-gray-500 hover:text-primary transition-colors"
+                        onclick="likeReview({{ review.id }})">
+                    <i class="far fa-thumbs-up mr-1"></i>
+                    <span class="review-likes-count">{{ review.likes.count }}</span>
+                </button>
+                
+                {% if user.is_authenticated and user != review.user %}
+                    <button class="text-gray-500 hover:text-primary transition-colors"
+                            onclick="reportReview({{ review.id }})">
+                        <i class="far fa-flag mr-1"></i>
+                        Signaler
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">Aucun avis pour le moment.</p>
+        </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,32 @@
+<div class="flex items-center gap-4 py-4 border-b">
+    <div class="flex-shrink-0">
+        {% if item.product %}
+            {% if item.product.images.all %}
+                {% with item.product.images.all|first as image %}
+                    <img src="{{ image.image.url }}" alt="{{ item.product_name }}" class="w-16 h-16 object-cover rounded">
+                {% endwith %}
+            {% else %}
+                <img src="https://picsum.photos/seed/{{ item.id }}/100/100.jpg" alt="{{ item.product_name }}" class="w-16 h-16 object-cover rounded">
+            {% endif %}
+        {% elif item.service %}
+            {% if item.service.image %}
+                <img src="{{ item.service.image.url }}" alt="{{ item.product_name }}" class="w-16 h-16 object-cover rounded">
+            {% else %}
+                <img src="https://picsum.photos/seed/{{ item.id }}/100/100.jpg" alt="{{ item.product_name }}" class="w-16 h-16 object-cover rounded">
+            {% endif %}
+        {% endif %}
+    </div>
+    
+    <div class="flex-grow">
+        <h4 class="font-semibold">{{ item.product_name }}</h4>
+        {% if item.sku %}
+            <p class="text-sm text-gray-600">SKU: {{ item.sku }}</p>
+        {% endif %}
+        <p class="text-sm text-gray-600">Quantité: {{ item.quantity }}</p>
+    </div>
+    
+    <div class="text-right">
+        <div class="font-semibold">{{ item.price }} FCFA</div>
+        <div class="text-sm text-gray-600">Total: {{ item.total }} FCFA</div>
+    </div>
+</div>

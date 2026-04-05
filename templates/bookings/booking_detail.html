@@ -1,0 +1,659 @@
+{% extends 'base.html' %}
+
+{% block title %}Réservation #{{ booking.id }} - {{ booking.service.name }} - Luxious Beautyland{% endblock %}
+{% block meta_description %}Détails de votre réservation pour {{ booking.service.name }} chez Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-gray-600">
+            <li><a href="{% url 'home' %}" class="hover:text-primary">Accueil</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li><a href="{% url 'booking_list' %}" class="hover:text-primary">Mes réservations</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li class="text-gray-800">Réservation #{{ booking.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Status Banner -->
+        <div class="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold mb-2">Réservation #{{ booking.id }}</h1>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar mr-2"></i>
+                            <span>{{ booking.date|date:"l d F Y" }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 md:mt-0">
+                    <div class="inline-block px-4 py-2 rounded-full text-sm font-semibold
+                        {% if booking.status == 'confirmed' %}bg-green-400 text-gray-800
+                        {% elif booking.status == 'pending' %}bg-yellow-400 text-gray-800
+                        {% elif booking.status == 'cancelled' %}bg-red-400 text-white
+                        {% elif booking.status == 'completed' %}bg-blue-400 text-white
+                        {% else %}bg-gray-400 text-white
+                        {% endif %}">
+                        {% if booking.status == 'confirmed' %}
+                            <i class="fas fa-check-circle mr-2"></i>Confirmée
+                        {% elif booking.status == 'pending' %}
+                            <i class="fas fa-clock mr-2"></i>En attente
+                        {% elif booking.status == 'cancelled' %}
+                            <i class="fas fa-times-circle mr-2"></i>Annulée
+                        {% elif booking.status == 'completed' %}
+                            <i class="fas fa-check-double mr-2"></i>Terminée
+                        {% else %}
+                            <i class="fas fa-user-slash mr-2"></i>No Show
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Service Details -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="flex">
+                        {% if booking.service.image %}
+                            <img src="{{ booking.service.image.url }}" alt="{{ booking.service.name }}" 
+                                 class="w-32 h-32 object-cover">
+                        {% else %}
+                            <img src="https://picsum.photos/seed/{{ booking.service.id }}/150/150.jpg" 
+                                 alt="{{ booking.service.name }}" class="w-32 h-32 object-cover">
+                        {% endif %}
+                        
+                        <div class="flex-grow p-6">
+                            <h2 class="text-xl font-bold mb-2">{{ booking.service.name }}</h2>
+                            <p class="text-gray-600 mb-4">{{ booking.service.short_description }}</p>
+                            
+                            <div class="flex flex-wrap gap-4 text-sm">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>{{ booking.service.duration }} minutes</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-users mr-2"></i>
+                                    <span>{{ booking.participants }} participant{{ booking.participants|pluralize }}</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    <span>{{ booking.service.price }} FCFA/personne</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 px-6 py-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Total payé</span>
+                            <span class="text-2xl font-bold text-primary">{{ booking.total }} FCFA</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Information -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Informations de réservation</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-gray-600">Date</label>
+                                <div class="font-medium">{{ booking.date|date:"l d F Y" }}</div>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Heure</label>
+                                <div class="font-medium">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Durée</label>
+                                <div class="font-medium">{{ booking.service.duration }} minutes</div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-gray-600">Participants</label>
+                                <div class="font-medium">{{ booking.participants }} personne{{ booking.participants|pluralize }}</div>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Prix unitaire</label>
+                                <div class="font-medium">{{ booking.service.price }} FCFA</div>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Statut</label>
+                                <div class="font-medium">
+                                    {% if booking.status == 'confirmed' %}
+                                        <span class="text-green-600">Confirmée</span>
+                                    {% elif booking.status == 'pending' %}
+                                        <span class="text-yellow-600">En attente</span>
+                                    {% elif booking.status == 'cancelled' %}
+                                        <span class="text-red-600">Annulée</span>
+                                    {% elif booking.status == 'completed' %}
+                                        <span class="text-blue-600">Terminée</span>
+                                    {% else %}
+                                        <span class="text-gray-600">No Show</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if booking.notes %}
+                        <div class="mt-6 pt-6 border-t">
+                            <label class="text-sm text-gray-600">Notes</label>
+                            <div class="font-medium mt-1">{{ booking.notes }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Timeline -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Historique de la réservation</h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Booking Created -->
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-calendar-plus text-sm"></i>
+                            </div>
+                            <div class="ml-4 flex-grow">
+                                <div class="font-medium">Réservation créée</div>
+                                <div class="text-sm text-gray-600">
+                                    {{ booking.created_at|date:"d F Y à H:i" }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Booking Confirmed -->
+                        {% if booking.status == 'confirmed' or booking.status == 'completed' %}
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-sm"></i>
+                                </div>
+                                <div class="ml-4 flex-grow">
+                                    <div class="font-medium">Réservation confirmée</div>
+                                    <div class="text-sm text-gray-600">
+                                        {% if booking.updated_at != booking.created_at %}
+                                            {{ booking.updated_at|date:"d F Y à H:i" }}
+                                        {% else %}
+                                            {{ booking.created_at|date:"d F Y à H:i" }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Booking Completed -->
+                        {% if booking.status == 'completed' %}
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check-double text-sm"></i>
+                                </div>
+                                <div class="ml-4 flex-grow">
+                                    <div class="font-medium">Service terminé</div>
+                                    <div class="text-sm text-gray-600">
+                                        {{ booking.date|date:"d F Y" }} à {{ booking.end_time|time:"H:i" }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Booking Cancelled -->
+                        {% if booking.status == 'cancelled' %}
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center">
+                                    <i class="fas fa-times text-sm"></i>
+                                </div>
+                                <div class="ml-4 flex-grow">
+                                    <div class="font-medium">Réservation annulée</div>
+                                    <div class="text-sm text-gray-600">
+                                        {% if booking.updated_at != booking.created_at %}
+                                            {{ booking.updated_at|date:"d F Y à H:i" }}
+                                        {% else %}
+                                            {{ booking.created_at|date:"d F Y à H:i" }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Actions rapides</h3>
+                    
+                    <div class="space-y-3">
+                        {% if booking.status == 'confirmed' %}
+                            <button onclick="cancelBooking()" 
+                                    class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
+                                <i class="fas fa-times mr-2"></i>Annuler la réservation
+                            </button>
+                        {% endif %}
+                        
+                        {% if booking.status == 'completed' %}
+                            <button onclick="showReviewModal()" 
+                                    class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-secondary transition-colors">
+                                <i class="fas fa-star mr-2"></i>Laisser un avis
+                            </button>
+                        {% endif %}
+                        
+                        <button onclick="shareBooking()" 
+                                class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-share-alt mr-2"></i>Partager
+                        </button>
+                        
+                        <button onclick="window.print()" 
+                                class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-print mr-2"></i>Imprimer
+                        </button>
+                        
+                        <a href="{% url 'booking_list' %}" 
+                           class="block w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-center">
+                            <i class="fas fa-arrow-left mr-2"></i>Retour à la liste
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Besoin d'aide?</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-primary mr-3"></i>
+                            <div>
+                                <div class="font-medium">Téléphone</div>
+                                <div class="text-sm text-gray-600">+228 90 71 29 28</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-primary mr-3"></i>
+                            <div>
+                                <div class="font-medium">Email</div>
+                                <div class="text-sm text-gray-600">contact@Luxiousbeautyland.com</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <i class="fas fa-clock text-primary mr-3"></i>
+                            <div>
+                                <div class="font-medium">Horaires</div>
+                                <div class="text-sm text-gray-600">Lun-Ven: 8h-18h</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Similar Services -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Services similaires</h3>
+                    
+                    <div class="space-y-4">
+                        {% for service in similar_services %}
+                            <div class="flex items-center gap-3">
+                                {% if service.image %}
+                                    <img src="{{ service.image.url }}" alt="{{ service.name }}" 
+                                         class="w-12 h-12 object-cover rounded">
+                                {% else %}
+                                    <img src="https://picsum.photos/seed/{{ service.id }}/100/100.jpg" 
+                                         alt="{{ service.name }}" class="w-12 h-12 object-cover rounded">
+                                {% endif %}
+                                <div class="flex-grow">
+                                    <h4 class="font-medium text-sm">{{ service.name }}</h4>
+                                    <div class="text-xs text-gray-600">
+                                        {{ service.duration }} min • {{ service.price }} FCFA
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-sm text-gray-500">Aucun service similaire trouvé</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Important Information -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-yellow-800 mb-2">
+                        <i class="fas fa-info-circle mr-2"></i>Information importante
+                    </h3>
+                    <p class="text-sm text-yellow-700">
+                        {% if booking.status == 'confirmed' %}
+                            Veuillez arriver 10 minutes avant votre rendez-vous. Un retard de plus de 15 minutes 
+                            peut entraîner l'annulation de votre réservation.
+                        {% elif booking.status == 'completed' %}
+                            Merci d'avoir choisi nos services! N'hésitez pas à laisser un avis pour partager votre expérience.
+                        {% elif booking.status == 'cancelled' %}
+                            Votre réservation a été annulée. Contactez-nous si vous souhaitez la reprogrammer.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div id="cancel-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Annuler la réservation</h3>
+            <p class="text-gray-600">
+                Êtes-vous sûr de vouloir annuler votre réservation pour {{ booking.service.name }}?
+            </p>
+        </div>
+        
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p class="text-sm text-yellow-800">
+                <i class="fas fa-info-circle mr-2"></i>
+                <strong>Note:</strong> Les annulations doivent être faites au moins 24 heures avant le rendez-vous 
+                pour éviter des frais d'annulation.
+            </p>
+        </div>
+        
+        <div class="flex space-x-3">
+            <button onclick="hideCancelModal()" 
+                    class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                Non, garder
+            </button>
+            <button onclick="confirmCancel()" 
+                    class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
+                Oui, annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-star text-primary text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Laisser un avis</h3>
+            <p class="text-gray-600">
+                Partagez votre expérience pour {{ booking.service.name }}
+            </p>
+        </div>
+        
+        <form id="review-form" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="service_id" value="{{ booking.service.id }}">
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                <div class="flex justify-center space-x-2">
+                    {% for i in "12345" %}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rating" value="{{ forloop.counter }}" class="hidden">
+                            <i class="far fa-star text-3xl text-gray-400 hover:text-yellow-400 transition-colors rating-star"></i>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div>
+                <label for="review-title" class="block text-sm font-medium text-gray-700 mb-2">Titre</label>
+                <input type="text" id="review-title" name="title" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                       placeholder="Résumez votre expérience">
+            </div>
+            
+            <div>
+                <label for="review-comment" class="block text-sm font-medium text-gray-700 mb-2">Commentaire</label>
+                <textarea id="review-comment" name="comment" rows="4" required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                          placeholder="Détaillez votre expérience..."></textarea>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button type="button" onclick="hideReviewModal()" 
+                        class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                    Annuler
+                </button>
+                <button type="submit" 
+                        class="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-secondary transition-colors">
+                    Envoyer l'avis
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <div class="text-center mb-6">
+            <h3 class="text-xl font-bold mb-2">Partager la réservation</h3>
+            <p class="text-gray-600">
+                Partagez votre réservation pour {{ booking.service.name }}
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <button onclick="shareOn('facebook')" 
+                    class="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                <i class="fab fa-facebook-f text-2xl text-blue-600 mb-2"></i>
+                <span class="text-xs">Facebook</span>
+            </button>
+            <button onclick="shareOn('twitter')" 
+                    class="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                <i class="fab fa-twitter text-2xl text-blue-400 mb-2"></i>
+                <span class="text-xs">Twitter</span>
+            </button>
+            <button onclick="shareOn('whatsapp')" 
+                    class="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                <i class="fab fa-whatsapp text-2xl text-green-500 mb-2"></i>
+                <span class="text-xs">WhatsApp</span>
+            </button>
+            <button onclick="copyLink()" 
+                    class="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                <i class="fas fa-link text-2xl text-gray-600 mb-2"></i>
+                <span class="text-xs">Copier</span>
+            </button>
+        </div>
+        
+        <button onclick="hideShareModal()" 
+                class="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+            Fermer
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Modal Functions
+    function showCancelModal() {
+        document.getElementById('cancel-modal').classList.remove('hidden');
+    }
+    
+    function hideCancelModal() {
+        document.getElementById('cancel-modal').classList.add('hidden');
+    }
+    
+    function showReviewModal() {
+        document.getElementById('review-modal').classList.remove('hidden');
+    }
+    
+    function hideReviewModal() {
+        document.getElementById('review-modal').classList.add('hidden');
+    }
+    
+    function showShareModal() {
+        document.getElementById('share-modal').classList.remove('hidden');
+    }
+    
+    function hideShareModal() {
+        document.getElementById('share-modal').classList.add('hidden');
+    }
+    
+    // Cancel Booking
+    function cancelBooking() {
+        showCancelModal();
+    }
+    
+    function confirmCancel() {
+        fetch(`/api/bookings/{{ booking.id }}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                hideCancelModal();
+                showNotification('Réservation annulée avec succès', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showNotification(data.message || 'Erreur lors de l\'annulation', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Une erreur est survenue. Veuillez réessayer.', 'error');
+        });
+    }
+    
+    // Review Functions
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.previousElementSibling.value);
+            document.querySelectorAll('.rating-star').forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('far');
+                    s.classList.add('fas', 'text-yellow-400');
+                } else {
+                    s.classList.remove('fas', 'text-yellow-400');
+                    s.classList.add('far');
+                }
+            });
+        });
+    });
+    
+    document.getElementById('review-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            service_id: formData.get('service_id'),
+            rating: formData.get('rating'),
+            title: formData.get('title'),
+            comment: formData.get('comment')
+        };
+        
+        fetch(`/services/{{ booking.service.id }}/review/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                hideReviewModal();
+                showNotification('Avis envoyé avec succès!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showNotification(data.message || 'Erreur lors de l\'envoi de l\'avis', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Une erreur est survenue. Veuillez réessayer.', 'error');
+        });
+    });
+    
+    // Share Functions
+    function shareBooking() {
+        showShareModal();
+    }
+    
+    function shareOn(platform) {
+        const url = window.location.href;
+        const title = `Ma réservation chez Luxious Beautyland - {{ booking.service.name }}`;
+        const text = `J'ai réservé {{ booking.service.name }} pour le {{ booking.date|date:"d F Y" }} à {{ booking.start_time|time:"H:i" }}`;
+        
+        let shareUrl = '';
+        
+        switch(platform) {
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+                break;
+        }
+        
+        if (shareUrl) {
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+        }
+    }
+    
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showNotification('Lien copié dans le presse-papiers!', 'success');
+            hideShareModal();
+        }).catch(() => {
+            showNotification('Erreur lors de la copie du lien', 'error');
+        });
+    }
+    
+    // Notification Helper
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 fade-in ${
+            type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+    
+    // Add to Calendar
+    function addToCalendar() {
+        const startDate = new Date('{{ booking.date|date:"Y-m-d" }}T{{ booking.start_time|time:"H:i" }}');
+        const endDate = new Date('{{ booking.date|date:"Y-m-d" }}T{{ booking.end_time|time:"H:i" }}');
+        
+        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${startDate.toISOString().replace(/[-:]/g, '')}/${endDate.toISOString().replace(/[-:]/g, '')}&text=${encodeURIComponent('Réservation - ' + booking.service.name)}&details=${encodeURIComponent(booking.service.short_description)}&location=${encodeURIComponent('Luxious Beautyland')}`;
+        
+        window.open(googleCalendarUrl, '_blank');
+    }
+</script>
+{% endblock %}

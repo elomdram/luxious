@@ -1,0 +1,102 @@
+{
+  "name": "Luxious Beautyland",
+  "short_name": "Luxious",
+  "description": "Découvrez les meilleurs Product et services de beauté chez Luxious Beautyland. Votre destination de confiance pour tous vos besoins en matière de beauté.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EC4899",
+  "theme_color": "#EC4899",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/static/images/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/images/screenshot-1.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "label": "Page d'accueil Luxious Beautyland"
+    },
+    {
+      "src": "/static/images/screenshot-2.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "label": "Catalogue de Product"
+    }
+  ],
+  "categories": ["beauty", "shopping", "lifestyle"],
+  "lang": "fr",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Product",
+      "short_name": "Product",
+      "description": "Voir tous nos Product de beauté",
+      "url": "/Product/",
+      "icons": [{ "src": "/static/images/shortcut-product.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Services",
+      "short_name": "Services",
+      "description": "Réserver un service beauté",
+      "url": "/services/",
+      "icons": [{ "src": "/static/images/shortcut-services.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Nous contacter",
+      "url": "/page/contact/",
+      "icons": [{ "src": "/static/images/shortcut-contact.png", "sizes": "96x96" }]
+    }
+  ]
+}

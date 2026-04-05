@@ -1,0 +1,604 @@
+{% extends 'base.html' %}
+
+{% block title %}Abonnements - Luxious Beautyland{% endblock %}
+{% block meta_description %}Découvrez nos offres d'abonnement exclusives pour profiter de services de beauté illimités et d'avantages premium{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-12 mb-12">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">Abonnements Luxious Beautyland</h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">
+                Transformez votre routine beauté avec nos abonnements exclusifs. 
+                Profitez de services illimités, de réductions spéciales et d'une expérience premium.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#plans" class="bg-white text-primary px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors">
+                    Voir les abonnements
+                </a>
+                <a href="#benefits" class="border border-white text-white px-8 py-3 rounded-md font-semibold hover:bg-white hover:text-primary transition-colors">
+                    Découvrir les avantages
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="benefits" class="mb-12">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Pourquoi s'abonner?</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Nos abonnements sont conçus pour vous offrir une expérience beauté complète et personnalisée
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-percentage text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Économies garanties</h3>
+                <p class="text-gray-600 text-sm">Jusqu'à 30% de réduction sur tous nos services et produits</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-crown text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Accès prioritaire</h3>
+                <p class="text-gray-600 text-sm">Réservations prioritaires et accès aux nouveaux services en avant-première</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-gift text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Cadeaux exclusifs</h3>
+                <p class="text-gray-600 text-sm">Produits gratuits et traitements surprises chaque mois</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-headset text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Support premium</h3>
+                <p class="text-gray-600 text-sm">Assistance dédiée 7j/7 et conseils personnalisés</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Plans -->
+    <section id="plans" class="mb-12">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Choisissez votre abonnement</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Des formules adaptées à tous les besoins et tous les budgets
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Basic Plan -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1">
+                <div class="bg-gray-100 p-6 text-center">
+                    <h3 class="text-2xl font-bold mb-2">Essentiel</h3>
+                    <div class="text-4xl font-bold text-gray-800 mb-2">15,000 FCFA</div>
+                    <div class="text-gray-600">par mois</div>
+                    <div class="mt-4 text-sm text-gray-500">Idéal pour un usage occasionnel</div>
+                </div>
+                
+                <div class="p-6">
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>2 services par mois</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>10% de réduction sur tous les services</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>5% de réduction sur les produits</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Réservation 48h à l'avance</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-times text-gray-400 mr-3"></i>
+                            <span>Services exclusifs</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-times text-gray-400 mr-3"></i>
+                            <span>Cadeaux mensuels</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-times text-gray-400 mr-3"></i>
+                            <span>Support dédié</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="selectPlan('basic')" 
+                            class="w-full bg-gray-100 text-gray-800 py-3 rounded-md font-semibold hover:bg-gray-200 transition-colors">
+                        Choisir l'abonnement
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Premium Plan -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1 relative">
+                <div class="absolute top-0 right-0 z-10">
+                    <div class="bg-yellow-400 text-gray-800 px-4 py-1 rounded-bl text-sm font-semibold">
+                        Populaire
+                    </div>
+                </div>
+                
+                <div class="bg-primary text-white p-6 text-center">
+                    <h3 class="text-2xl font-bold mb-2">Premium</h3>
+                    <div class="text-4xl font-bold mb-2">25,000 FCFA</div>
+                    <div class="text-primary-light">par mois</div>
+                    <div class="mt-4 text-sm opacity-90">Le meilleur rapport qualité-prix</div>
+                </div>
+                
+                <div class="p-6">
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>4 services par mois</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>20% de réduction sur tous les services</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>15% de réduction sur les produits</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Réservation 24h à l'avance</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Accès aux services exclusifs</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>1 cadeau mensuel</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-times text-gray-400 mr-3"></i>
+                            <span>Support dédié</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="selectPlan('premium')" 
+                            class="w-full bg-primary text-white py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                        Choisir l'abonnement
+                    </button>
+                </div>
+            </div>
+            
+            <!-- VIP Plan -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1">
+                <div class="bg-gray-800 text-white p-6 text-center">
+                    <h3 class="text-2xl font-bold mb-2">VIP</h3>
+                    <div class="text-4xl font-bold mb-2">40,000 FCFA</div>
+                    <div class="text-gray-300">par mois</div>
+                            <div class="mt-4 text-sm opacity-90">Pour les vrais passionnés</div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Services illimités</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>30% de réduction sur tous les services</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>25% de réduction sur les produits</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Réservation instantanée</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Accès VIP aux nouveaux services</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Cadeaux mensuels premium</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Support dédié 7j/7</span>
+                                </li>
+                            </ul>
+                            
+                            <button onclick="selectPlan('vip')" 
+                                    class="w-full bg-gray-800 text-white py-3 rounded-md font-semibold hover:bg-gray-900 transition-colors">
+                                Choisir l'abonnement
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Comparison Table -->
+            <section class="mb-12">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Comparaison des abonnements</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Comparez facilement nos différentes formules pour choisir celle qui vous convient le mieux
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">Caractéristiques</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Essentiel</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-primary">Premium</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">VIP</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 font-medium">Services par mois</td>
+                                    <td class="px-6 py-4 text-center">2</td>
+                                    <td class="px-6 py-4 text-center">4</td>
+                                    <td class="px-6 py-4 text-center">Illimités</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="px-6 py-4 font-medium">Réduction services</td>
+                                    <td class="px-6 py-4 text-center">10%</td>
+                                    <td class="px-6 py-4 text-center">20%</td>
+                                    <td class="px-6 py-4 text-center">30%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-medium">Réduction produits</td>
+                                    <td class="px-6 py-4 text-center">5%</td>
+                                    <td class="px-6 py-4 text-center">15%</td>
+                                    <td class="px-6 py-4 text-center">25%</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="px-6 py-4 font-medium">Délai réservation</td>
+                                    <td class="px-6 py-4 text-center">48h</td>
+                                    <td class="px-6 py-4 text-center">24h</td>
+                                    <td class="px-6 py-4 text-center">Instantanée</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-medium">Services exclusifs</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <i class="fas fa-times text-red-500"></i>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <i class="fas fa-check text-green-500"></i>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <i class="fas fa-check text-green-500"></i>
+                                    </td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="px-6 py-4 font-medium">Cadeaux mensuels</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <i class="fas fa-times text-red-500"></i>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">1 cadeau</td>
+                                    <td class="px-6 py-4 text-center">Cadeaux premium</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-medium">Support dédié</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <i class="fas fa-times text-red-500"></i>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <i class="fas fa-times text-red-500"></i>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <i class="fas fa-check text-green-500"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="mb-12">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Questions fréquentes</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Tout ce que vous devez savoir sur nos abonnements
+                    </p>
+                </div>
+                
+                <div class="max-w-3xl mx-auto">
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-lg shadow-md">
+                            <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                                    onclick="toggleFAQ(this)">
+                                <h3 class="text-lg font-semibold">Comment fonctionne l'abonnement?</h3>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="hidden px-6 pb-6">
+                                <p class="text-gray-600">
+                                    Une fois abonné, vous pouvez réserver vos services directement depuis votre espace client. 
+                                    Vos avantages sont appliqués automatiquement lors de la réservation et du paiement.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md">
+                            <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                                    onclick="toggleFAQ(this)">
+                                <h3 class="text-lg font-semibold">Puis-je changer d'abonnement?</h3>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="hidden px-6 pb-6">
+                                <p class="text-gray-600">
+                                    Oui, vous pouvez passer à un abonnement supérieur à tout moment. 
+                                    Le changement sera effectif dès le mois suivant.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md">
+                            <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                                    onclick="toggleFAQ(this)">
+                                <h3 class="text-lg font-semibold">Les services non utilisés sont-ils reportés?</h3>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="hidden px-6 pb-6">
+                                <p class="text-gray-600">
+                                    Pour les abonnements Essentiel et Premium, les services non utilisés sont reportés 
+                                    sur le mois suivant (maximum 2 mois). L'abonnement VIP n'a pas de limite.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md">
+                            <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                                    onclick="toggleFAQ(this)">
+                                <h3 class="text-lg font-semibold">Comment résilier mon abonnement?</h3>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="hidden px-6 pb-6">
+                                <p class="text-gray-600">
+                                    Vous pouvez résilier votre abonnement à tout moment depuis votre espace client. 
+                                    La résiliation sera effective à la fin du mois en cours.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md">
+                            <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                                    onclick="toggleFAQ(this)">
+                                <h3 class="text-lg font-semibold">Quels sont les moyens de paiement acceptés?</h3>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="hidden px-6 pb-6">
+                                <p class="text-gray-600">
+                                    Nous acceptons Mobile Money (MTN, Moov, Orange), Payoneer, 
+                                    les cartes de crédit et les virements bancaires.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials -->
+            <section class="mb-12">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Ce que nos abonnés en disent</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Découvrez les témoignages de nos clients satisfaits
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex mb-4">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star text-yellow-400"></i>
+                            {% endfor %}
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            "L'abonnement Premium a transformé ma routine beauté. J'économise beaucoup et 
+                            je découvre toujours de nouveaux services exclusifs!"
+                        </p>
+                        <div class="flex items-center">
+                            <img src="https://picsum.photos/seed/user1/50/50.jpg" alt="Cliente" 
+                                 class="w-12 h-12 rounded-full mr-3">
+                            <div>
+                                <h4 class="font-semibold">Aminata K.</h4>
+                                <p class="text-sm text-gray-500">Abonnée Premium</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex mb-4">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star text-yellow-400"></i>
+                            {% endfor %}
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            "Le service VIP est exceptionnel! Réservation instantanée, cadeaux chaque mois, 
+                            et un support incroyable. Vraiment le top!"
+                        </p>
+                        <div class="flex items-center">
+                            <img src="https://picsum.photos/seed/user2/50/50.jpg" alt="Client" 
+                                 class="w-12 h-12 rounded-full mr-3">
+                            <div>
+                                <h4 class="font-semibold">Mawuli T.</h4>
+                                <p class="text-sm text-gray-500">Abonné VIP</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex mb-4">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star text-yellow-400"></i>
+                            {% endfor %}
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            "Parfait pour mon budget. L'abonnement Essentiel me permet de profiter 
+                            de services de qualité sans me ruiner."
+                        </p>
+                        <div class="flex items-center">
+                            <img src="https://picsum.photos/seed/user3/50/50.jpg" alt="Cliente" 
+                                 class="w-12 h-12 rounded-full mr-3">
+                            <div>
+                                <h4 class="font-semibold">Seydou B.</h4>
+                                <p class="text-sm text-gray-500">Abonné Essentiel</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-12 text-center">
+                <h2 class="text-3xl font-bold mb-4">Prêt à transformer votre routine beauté?</h2>
+                <p class="text-xl mb-8">Rejoignez des milliers de clientes satisfaites et profitez des meilleurs services de beauté</p>
+                <button onclick="showSubscriptionModal()" 
+                        class="bg-white text-primary px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors">
+                    Commencer maintenant
+                </button>
+            </section>
+        </div>
+    </div>
+
+    <!-- Subscription Modal -->
+    <div id="subscription-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Finaliser l'abonnement</h3>
+                <button onclick="hideSubscriptionModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="subscription-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Plan sélectionné</label>
+                    <input type="text" id="selected-plan" readonly 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Moyen de paiement</label>
+                    <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary" required>
+                        <option value="">Sélectionner un moyen de paiement</option>
+                        <option value="mobile_money">Mobile Money</option>
+                        <option value="credit_card">Carte de crédit</option>
+                        <option value="bank_transfer">Virement bancaire</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="flex items-start">
+                        <input type="checkbox" class="mt-1 mr-2" required>
+                        <span class="text-sm text-gray-600">
+                            J'accepte les <a href="#" class="text-primary hover:text-secondary">conditions générales d'abonnement</a> 
+                            et autorise le prélèvement mensuel.
+                        </span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                    Confirmer l'abonnement
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedPlan = null;
+    
+    // Select Plan
+    function selectPlan(plan) {
+        selectedPlan = plan;
+        const planNames = {
+            'basic': 'Essentiel - 15,000 FCFA/mois',
+            'premium': 'Premium - 25,000 FCFA/mois',
+            'vip': 'VIP - 40,000 FCFA/mois'
+        };
+        
+        document.getElementById('selected-plan').value = planNames[plan];
+        showSubscriptionModal();
+    }
+    
+    // Modal Functions
+    function showSubscriptionModal() {
+        document.getElementById('subscription-modal').classList.remove('hidden');
+    }
+    
+    function hideSubscriptionModal() {
+        document.getElementById('subscription-modal').classList.add('hidden');
+    }
+    
+    // FAQ Toggle
+    function toggleFAQ(button) {
+        const content = button.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        content.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
+    }
+    
+    // Subscription Form Submit
+    document.getElementById('subscription-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!selectedPlan) {
+            alert('Veuillez sélectionner un plan d\'abonnement.');
+            return;
+        }
+        
+        const formData = new FormData(this);
+        const data = {
+            plan: selectedPlan,
+            payment_method: formData.get('payment_method')
+        };
+        
+        // Simulate API call
+        console.log('Subscription data:', data);
+        
+        // Show success message
+        alert('Félicitations! Votre abonnement a été activé avec succès.');
+        hideSubscriptionModal();
+        
+        // Redirect to subscription confirmation page
+        // window.location.href = '/subscription/confirmation/';
+    });
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

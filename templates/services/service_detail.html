@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ service.name }} - Luxious Beautyland{% endblock %}
+{% block meta_description %}{{ service.short_description }} - Réservez votre service de beauté chez Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-gray-600">
+            <li><a href="{% url 'home' %}" class="hover:text-primary">Accueil</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li><a href="{% url 'service_list' %}" class="hover:text-primary">Services</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li class="text-gray-800">{{ service.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <!-- Service Header -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="relative">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service.name }}" class="w-full h-96 object-cover">
+                    {% else %}
+                        <img src="https://picsum.photos/seed/{{ service.id }}/800/600.jpg" alt="{{ service.name }}" class="w-full h-96 object-cover">
+                    {% endif %}
+                    
+                    <div class="absolute top-4 right-4">
+                        <button class="bg-white text-primary p-3 rounded-full shadow-md hover:bg-primary hover:text-white transition-colors"
+                                onclick="toggleWishlist({{ service.id }}, 'service')">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h1 class="text-3xl font-bold mb-2">{{ service.name }}</h1>
+                            <div class="flex items-center space-x-4 text-gray-600">
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>{{ service.duration }} minutes</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-users mr-2"></i>
+                                    <span>Max {{ service.max_participants }} participants</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-right">
+                            <div class="text-3xl font-bold text-primary">{{ service.price }} FCFA</div>
+                            <div class="text-gray-600">par personne</div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-700 mb-6">{{ service.description|safe }}</p>
+                    
+                    <!-- Service Features -->
+                    {% if service.features %}
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-4">Ce service comprend</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {% for feature in service.features.all %}
+                                    <div class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>{{ feature.name }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="{% url 'booking_create' service.id %}" class="flex-1 bg-primary text-white text-center py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                            <i class="fas fa-calendar-check mr-2"></i>Réserver maintenant
+                        </a>
+                        <button class="flex-1 bg-gray-100 text-gray-800 py-3 rounded-md font-semibold hover:bg-gray-200 transition-colors"
+                                onclick="showBookingModal()">
+                            <i class="fas fa-info-circle mr-2"></i>Voir les disponibilités
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Avis des clients</h2>
+                    {% if user.is_authenticated %}
+                        <button class="text-primary hover:text-secondary transition-colors"
+                                onclick="showReviewForm()">
+                            <i class="fas fa-plus mr-2"></i>Ajouter un avis
+                        </button>
+                    {% endif %}
+                </div>
+                
+                <!-- Rating Summary -->
+                <div class="flex items-center mb-6">
+                    <div class="text-4xl font-bold text-primary mr-4">{{ average_rating|floatformat:1 }}</div>
+                    <div>
+                        <div class="flex text-yellow-400 mb-1">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= average_rating|floatformat:0 %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="text-sm text-gray-600">{{ reviews.count }} avis</div>
+                    </div>
+                </div>
+                
+                <!-- Reviews List -->
+                <div id="reviews-list">
+                    {% include 'reviews/partials/review_list.html' %}
+                </div>
+                
+                <!-- Review Form (Hidden by default) -->
+                <div id="review-form-container" class="hidden">
+                    {% include 'reviews/partials/review_form.html' %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Quick Booking -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 sticky top-20">
+                <h3 class="text-xl font-semibold mb-4">Réservation rapide</h3>
+                
+                <form id="quick-booking-form">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                        <input type="date" id="quick-date" name="date" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary"
+                               min="{{ today|date:'Y-m-d' }}" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Heure</label>
+                        <select id="quick-time" name="time" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary" required>
+                            <option value="">Sélectionner une heure</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de participants</label>
+                        <input type="number" id="quick-participants" name="participants" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary"
+                               value="1" min="1" max="{{ service.max_participants }}" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes (optionnel)</label>
+                        <textarea id="quick-notes" name="notes" rows="3" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary"
+                                  placeholder="Informations supplémentaires..."></textarea>
+                    </div>
+                    
+                    <div class="bg-gray-100 p-4 rounded-md mb-4">
+                        <div class="flex justify-between mb-2">
+                            <span>Prix par personne:</span>
+                            <span>{{ service.price }} FCFA</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span>Total:</span>
+                            <span id="quick-total">{{ service.price }} FCFA</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-md font-semibold hover:bg-secondary transition-colors">
+                        Confirmer la réservation
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Related Services -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4">Services similaires</h3>
+                <div class="space-y-4">
+                    {% for related_service in related_services %}
+                        <div class="flex items-center gap-3">
+                            {% if related_service.image %}
+                                <img src="{{ related_service.image.url }}" alt="{{ related_service.name }}" 
+                                     class="w-16 h-16 object-cover rounded">
+                            {% else %}
+                                <img src="https://picsum.photos/seed/{{ related_service.id }}/100/100.jpg" alt="{{ related_service.name }}" 
+                                     class="w-16 h-16 object-cover rounded">
+                            {% endif %}
+                            <div class="flex-grow">
+                                <h4 class="font-semibold">{{ related_service.name }}</h4>
+                                <div class="text-sm text-gray-600">
+                                    {{ related_service.duration }} min • {{ related_service.price }} FCFA
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">Aucun service similaire trouvé.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div id="booking-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold">Disponibilités - {{ service.name }}</h3>
+            <button onclick="hideBookingModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <div id="availability-calendar" class="mb-6">
+            <!-- Calendar will be loaded here -->
+        </div>
+        
+        <div id="availability-slots" class="grid grid-cols-4 gap-3">
+            <!-- Time slots will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Quick Booking Form
+    document.getElementById('quick-booking-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            date: formData.get('date'),
+            start_time: formData.get('time'),
+            participants: formData.get('participants'),
+            notes: formData.get('notes')
+        };
+        
+        fetch(`/services/{{ service.id }}/book/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert(data.message || 'Une erreur est survenue. Veuillez réessayer.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+    });
+    
+    // Update total when participants change
+    document.getElementById('quick-participants').addEventListener('input', function() {
+        const participants = parseInt(this.value);
+        const price = parseInt("{{ service.price }}");
+        const total = price * participants;
+        document.getElementById('quick-total').textContent = total + ' FCFA';
+    });
+    
+    // Load available times when date changes
+    document.getElementById('quick-date').addEventListener('change', function() {
+        const date = this.value;
+        if (date) {
+            loadAvailableTimes(date);
+        }
+    });
+    
+    function loadAvailableTimes(date) {
+        fetch(`/api/services/{{ service.id }}/available-dates/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const timeSelect = document.getElementById('quick-time');
+                timeSelect.innerHTML = '<option value="">Sélectionner une heure</option>';
+                
+                // Generate time slots based on service duration and opening hours
+                const startTime = 8 * 60; // 8:00 AM in minutes
+                const endTime = 18 * 60; // 6:00 PM in minutes
+                const duration = parseInt("{{ service.duration }}");
+                
+                for (let time = startTime; time <= endTime - duration; time += 30) {
+                    const hours = Math.floor(time / 60);
+                    const minutes = time % 60;
+                    const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                    
+                    // Check if slot is available
+                    const isAvailable = !data.booked_slots[date] || 
+                                       !data.booked_slots[date].some(slot => 
+                                           (time >= parseInt(slot.start.split(':')[0]) * 60 + parseInt(slot.start.split(':')[1]) && 
+                                            time < parseInt(slot.end.split(':')[0]) * 60 + parseInt(slot.end.split(':')[1]))
+                                       );
+                    
+                    if (isAvailable) {
+                        const option = document.createElement('option');
+                        option.value = timeString;
+                        option.textContent = timeString;
+                        timeSelect.appendChild(option);
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+    // Booking Modal Functions
+    function showBookingModal() {
+        document.getElementById('booking-modal').classList.remove('hidden');
+        loadAvailabilityCalendar();
+    }
+    
+    function hideBookingModal() {
+        document.getElementById('booking-modal').classList.add('hidden');
+    }
+    
+    function loadAvailabilityCalendar() {
+        // Simple calendar implementation
+        const calendar = document.getElementById('availability-calendar');
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        // Generate calendar HTML
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        
+        let calendarHTML = '<div class="grid grid-cols-7 gap-2 text-center">';
+        
+        // Day headers
+        const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+        dayNames.forEach(day => {
+            calendarHTML += `<div class="font-semibold">${day}</div>`;
+        });
+        
+        // Empty cells for first week
+        for (let i = 0; i < firstDay; i++) {
+            calendarHTML += '<div></div>';
+        }
+        
+        // Days of month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(currentYear, currentMonth, day);
+            const dateString = date.toISOString().split('T')[0];
+            const isPast = date < today;
+            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            
+            calendarHTML += `<div class="p-2 rounded cursor-pointer hover:bg-primary hover:text-white ${isPast ? 'text-gray-400 cursor-not-allowed' : ''} ${isWeekend ? 'text-gray-500' : ''}" 
+                             onclick="${!isPast && !isWeekend ? `selectDate('${dateString}')` : ''}">${day}</div>`;
+        }
+        
+        calendarHTML += '</div>';
+        calendar.innerHTML = calendarHTML;
+    }
+    
+    function selectDate(date) {
+        loadAvailableTimes(date);
+        document.getElementById('quick-date').value = date;
+        hideBookingModal();
+    }
+    
+    // Review Functions
+    function showReviewForm() {
+        const formContainer = document.getElementById('review-form-container');
+        formContainer.classList.toggle('hidden');
+    }
+    
+    // Rating Stars
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            document.querySelectorAll('.rating-star').forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('far');
+                    s.classList.add('fas', 'text-yellow-400');
+                } else {
+                    s.classList.remove('fas', 'text-yellow-400');
+                    s.classList.add('far');
+                }
+            });
+            document.querySelector('input[name="rating"][value="' + rating + '"]').checked = true;
+        });
+    });
+    
+    // Review Form Submit
+    document.getElementById('review-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            rating: formData.get('rating'),
+            title: formData.get('title'),
+            comment: formData.get('comment')
+        };
+        
+        fetch(`/services/{{ service.id }}/review/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Une erreur est survenue. Veuillez réessayer.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+    });
+</script>
+{% endblock %}
+
+git config --global user.email "elomdram@gmail.com"
+git config --global user.name "elomdram"

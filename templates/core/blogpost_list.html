@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}Blog - Luxious Beautyland{% endblock %}
+{% block meta_description %}Découvrez nos conseils d'experts, tendances beauté et actualités sur le blog Luxious Beautyland{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold mb-4">Blog Beauté</h1>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+            Conseils d'experts, tendances beauté, tutoriels et actualités pour sublimer votre routine beauté
+        </p>
+    </div>
+
+    <!-- Featured Post -->
+    {% if featured_post %}
+        <section class="mb-12">
+            <div class="bg-gradient-to-r from-primary to-secondary rounded-lg overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2">
+                    <div class="p-8 lg:p-12 text-white">
+                        <div class="mb-4">
+                            <span class="bg-yellow-400 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                Article en vedette
+                            </span>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-4">{{ featured_post.title }}</h2>
+                        <p class="mb-6 opacity-90">{{ featured_post.excerpt|truncatechars:200 }}</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                {% if featured_post.author.profile_picture %}
+                                    <img src="{{ featured_post.author.profile_picture.url }}" alt="{{ featured_post.author.get_full_name }}" 
+                                         class="w-10 h-10 rounded-full mr-3">
+                                {% else %}
+                                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full mr-3 flex items-center justify-center">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="font-semibold">{{ featured_post.author.get_full_name|default:featured_post.author.username }}</div>
+                                    <div class="text-sm opacity-75">{{ featured_post.published_at|date:"d F Y" }}</div>
+                                </div>
+                            </div>
+                            <a href="{% url 'blog_detail' featured_post.slug %}" 
+                               class="bg-white text-primary px-6 py-2 rounded-md font-semibold hover:bg-gray-100 transition-colors">
+                                Lire l'article
+                            </a>
+                        </div>
+                    </div>
+                    <div class="h-96">
+                        {% if featured_post.image %}
+                            <img src="{{ featured_post.image.url }}" alt="{{ featured_post.title }}" 
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="https://picsum.photos/seed/{{ featured_post.id }}/600/400.jpg" alt="{{ featured_post.title }}" 
+                                 class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Categories and Search -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+        <!-- Main Content -->
+        <div class="lg:col-span-3">
+            <!-- Search and Sort -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-grow relative">
+                        <input type="text" id="search-input" placeholder="Rechercher des articles..." 
+                               class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                        <button id="search-btn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <select id="sort-by" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
+                        <option value="">Trier par</option>
+                        <option value="published_at" {% if request.GET.sort == 'published_at' %}selected{% endif %}>Plus récents</option>
+                        <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Titre A-Z</option>
+                        <option value="views" {% if request.GET.sort == 'views' %}selected{% endif %}>Plus vus</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Blog Posts Grid -->
+            <div id="posts-container" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {% for post in posts %}
+                    <article class="blog-post-card">
+                        {% include 'blog/partials/blog_card.html' %}
+                    </article>
+                {% empty %}
+                    <div class="col-span-full bg-white rounded-lg shadow-md p-12 text-center">
+                        <i class="fas fa-newspaper text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-semibold mb-4">Aucun article trouvé</h2>
+                        <p class="text-gray-600 mb-6">
+                            Essayez de modifier votre recherche ou revenez plus tard pour de nouveaux articles.
+                        </p>
+                        <button id="reset-search" class="bg-primary text-white px-6 py-2 rounded-md font-semibold hover:bg-secondary transition-colors">
+                            Réinitialiser la recherche
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="flex justify-center mt-8">
+                    <nav class="flex space-x-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?{% for key, value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}page={{ page_obj.previous_page_number }}" 
+                               class="px-3 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="px-3 py-2 bg-primary text-white rounded-md">{{ num }}</span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?{% for key, value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}page={{ num }}" 
+                                   class="px-3 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?{% for key, value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}page={{ page_obj.next_page_number }}" 
+                               class="px-3 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Categories -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Catégories</h3>
+                <div class="space-y-2">
+                    {% for category in blog_categories %}
+                        <a href="?category={{ category.slug }}" 
+                           class="flex justify-between items-center py-2 px-3 rounded hover:bg-gray-50 transition-colors {% if request.GET.category == category.slug %}bg-primary bg-opacity-10 text-primary{% endif %}">
+                            <span>{{ category.name }}</span>
+                            <span class="text-sm text-gray-500">({{ category.blog_posts.count }})</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Popular Posts -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Articles populaires</h3>
+                <div class="space-y-4">
+                    {% for popular_post in popular_posts %}
+                        <div class="flex gap-3">
+                            {% if popular_post.image %}
+                                <img src="{{ popular_post.image.url }}" alt="{{ popular_post.title }}" 
+                                     class="w-16 h-16 object-cover rounded">
+                            {% else %}
+                                <img src="https://picsum.photos/seed/{{ popular_post.id }}/100/100.jpg" alt="{{ popular_post.title }}" 
+                                     class="w-16 h-16 object-cover rounded">
+                            {% endif %}
+                            <div class="flex-grow">
+                                <h4 class="font-semibold text-sm mb-1 line-clamp-2">
+                                    <a href="{% url 'blog_detail' popular_post.slug %}" 
+                                       class="text-gray-800 hover:text-primary transition-colors">
+                                        {{ popular_post.title }}
+                                    </a>
+                                </h4>
+                                <div class="text-xs text-gray-500">{{ popular_post.published_at|date:"d F Y" }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Tags -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Tags populaires</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for tag in popular_tags %}
+                        <a href="?tag={{ tag.name }}" 
+                           class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-primary hover:text-white transition-colors">
+                            #{{ tag.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Newsletter -->
+            <div class="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Newsletter Beauté</h3>
+                <p class="mb-4 text-sm opacity-90">
+                    Recevez nos derniers articles et conseils beauté directement dans votre boîte de réception
+                </p>
+                <form id="newsletter-form" class="space-y-3">
+                    <input type="email" placeholder="Votre adresse email" required
+                           class="w-full px-3 py-2 rounded text-gray-800 focus:outline-none">
+                    <button type="submit" 
+                            class="w-full bg-white text-primary py-2 rounded font-semibold hover:bg-gray-100 transition-colors">
+                        S'abonner
+                    </button>
+                </form>
+                <div id="newsletter-message" class="mt-3 text-sm"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Search
+    document.getElementById('search-btn').addEventListener('click', function() {
+        const searchInput = document.getElementById('search-input').value;
+        const url = new URL(window.location);
+        
+        if (searchInput) {
+            url.searchParams.set('q', searchInput);
+        } else {
+            url.searchParams.delete('q');
+        }
+        
+        window.location.href = url.toString();
+    });
+    
+    document.getElementById('search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('search-btn').click();
+        }
+    });
+    
+    // Sort
+    document.getElementById('sort-by').addEventListener('change', function() {
+        const url = new URL(window.location);
+        
+        if (this.value) {
+            url.searchParams.set('sort', this.value);
+        } else {
+            url.searchParams.delete('sort');
+        }
+        
+        window.location.href = url.toString();
+    });
+    
+    // Reset Search
+    document.getElementById('reset-search').addEventListener('click', function() {
+        window.location.href = window.location.pathname;
+    });
+    
+    // Newsletter Form
+    document.getElementById('newsletter-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = this.querySelector('input[type="email"]').value;
+        const messageDiv = document.getElementById('newsletter-message');
+        
+        fetch('{% url "newsletter_subscribe" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageDiv.innerHTML = '<div class="text-green-300">' + data.message + '</div>';
+                this.querySelector('input[type="email"]').value = '';
+            } else {
+                messageDiv.innerHTML = '<div class="text-red-300">' + data.message + '</div>';
+            }
+        })
+        .catch(error => {
+            messageDiv.innerHTML = '<div class="text-red-300">Une erreur est survenue. Veuillez réessayer.</div>';
+        });
+    });
+</script>
+{% endblock %}

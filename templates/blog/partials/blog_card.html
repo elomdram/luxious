@@ -1,0 +1,22 @@
+<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+    {% if post.image %}
+        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+    {% else %}
+        <img src="https://picsum.photos/seed/{{ post.id }}/400/300.jpg" alt="{{ post.title }}" class="w-full h-48 object-cover">
+    {% endif %}
+    
+    <div class="p-6">
+        <div class="flex items-center text-sm text-gray-500 mb-2">
+            <span>{{ post.published_at|date:"d F Y" }}</span>
+            <span class="mx-2">•</span>
+            <span>{{ post.author.get_full_name|default:post.author.username }}</span>
+        </div>
+        
+        <h3 class="font-semibold text-xl mb-3">{{ post.title }}</h3>
+        <p class="text-gray-600 mb-4">{{ post.excerpt|truncatechars:120 }}</p>
+        
+        <a href="{% url 'blog_detail' post.slug %}" class="text-primary font-semibold hover:text-secondary transition-colors">
+            Lire la suite <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+</div>
