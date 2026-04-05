@@ -1,4 +1,3 @@
-from decouple import config, Csv
 from django.utils.translation import gettext_lazy as _
 import os
 from pathlib import Path
@@ -13,12 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in Production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = "jodUfHxtn-xiTr2c7_2D6hjaqhQ3o1voYE9ioVvKycNnWKALFzcs_EBIVex04I71G2M"
 
 # SECURITY WARNING: don't run with debug turned on in Production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = True
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = ['luxiousbeauty-land.com', 'www.luxiousbeauty-land.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -82,11 +81,11 @@ WSGI_APPLICATION = 'luxious.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+        'NAME': 'luxious_db',
+        'USER': 'luxious_user',
+        'PASSWORD': 'Elom1234',
+        'HOST': 'localhost',
+        'PORT': '5432',
         'OPTIONS': {
             'options': '-c client_encoding=UTF8',
         },
@@ -252,18 +251,22 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # CSRF Configuration
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
+CSRF_TRUSTED_ORIGINS = [
+    'https://luxiousbeauty-land.com',
+    'https://www.luxiousbeauty-land.com',
+    'https://173.212.211.47'
+]
 
 # Email Configuration
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'votre-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'Elom1234'
+DEFAULT_FROM_EMAIL = 'contact@luxiousbeauty-land.com'
 
 # FedaPay Configuration
-FEDAPAY_PUBLIC_KEY = config('FEDAPAY_PUBLIC_KEY')
-FEDAPAY_SECRET_KEY = config('FEDAPAY_SECRET_KEY')
-FEDAPAY_WEBHOOK_SECRET = config('FEDAPAY_WEBHOOK_SECRET')
-FEDAPAY_ENVIRONMENT = config('FEDAPAY_ENVIRONMENT')
+FEDAPAY_PUBLIC_KEY = 'pk_live_W2rHbWgvHU8xti08I6awZ5-k'
+FEDAPAY_SECRET_KEY = 'sk_live_hjR_OMLAPBS4YMYYn7KdvQr2'
+FEDAPAY_WEBHOOK_SECRET = 'wh_live_u1dDob_QpNm1oIUZrbYSC0FN'
+FEDAPAY_ENVIRONMENT = 'live'
