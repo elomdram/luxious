@@ -23,10 +23,8 @@ djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 idna==3.11
 kombu==5.6.2
-packaging @ file:///C:/miniconda3/conda-bld/packaging_1761049096285/work
 pillow==12.1.0
 prompt_toolkit==3.0.52
-psycopg2 @ file:///C:/Users/task_176616389330289/croot/psycopg2_1766164005542/work
 py-healthcheck==1.10.1
 PyJWT==2.11.0
 python-crontab==3.3.0
